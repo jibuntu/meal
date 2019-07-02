@@ -28,13 +28,22 @@ fn search(matches: &ArgMatches) {
     let mut name_list = match matches.value_of("column-type") {
         None => vec!["食品番号".to_string(), "食品名".to_string()],
         Some(t) => match t {
-            "0" => ["食品番号", "食品名", "重量", "エネルギー", "脂質", "炭水化物",
-                    "食物繊維総量", "ナトリウム", "カルシウム", "鉄", "レチノール活性当量",
-                    "ビタミンB1", "ビタミンB2", "ビタミンC"].iter().map(|n| n.to_string()).collect(),
+            "0" => ["食品番号", "食品名", "重量", "エネルギー", "たんぱく質",
+                    "脂質", "炭水化物", "食物繊維総量", "ナトリウム", "カルシウム",
+                    "鉄", "レチノール活性当量", "ビタミンB1", "ビタミンB2",
+                    "ビタミンC"].iter().map(|n| n.to_string()).collect(),
+            "1" => ["食品番号", "食品名", "重量", "エネルギー", "たんぱく質",
+                    "脂質", "炭水化物", "食物繊維総量", "レチノール活性当量",
+                    "ビタミンD", "α-トコフェロール", "ビタミンK", "ビタミンB1",
+                    "ビタミンB2", "ナイアシン", "ビタミンB6", "ビタミンB12",
+                    "葉酸", "パントテン酸", "ビオチン", "ビタミンC", "ナトリウム",
+                    "カリウム", "カルシウム", "マグネシウム", "リン", "鉄",
+                    "亜鉛", "銅", "マンガン", "ヨウ素", "セレン", "クロム",
+                    "モリブデン"].iter().map(|n| n.to_string()).collect(),
+
             _ => vec!["食品番号".to_string(), "食品名".to_string()],
         }
     };
-
 
     if let Some(values) = matches.values_of("column") {
         let mut ns: Vec<_> = values.into_iter().map(|value| value.to_string()).collect();
@@ -106,7 +115,8 @@ fn main() {
                 .short("t")
                 .min_values(1)
                 .help("columnのデフォルトの種類を設定します\n\
-                      0: columnを「調理・献立作成の基礎」と同じ設定にします")))
+                      0: 「調理・献立作成の基礎」と同じ設定にします\n\
+                      1: 摂取基準と同じ設定にします")))
         .subcommand(SubCommand::with_name("calc")
             .about("JSONから読み出して計算します"))
         .get_matches();
