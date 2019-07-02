@@ -1,8 +1,8 @@
 use std::fs::File;
 use std::io::BufReader;
 
-use serde_json::{Value};
-use prettytable::{Table, Row, Cell, format};
+use serde_json::{Value, to_string};
+use prettytable::{Table, Row, Cell};
 
 use super::food::Food;
 use crate::food::FoodData;
@@ -198,9 +198,17 @@ impl FoodTable {
 
     pub fn print(&self, name_list: &[&str]) {
         let mut table = Table::new();
-        table.set_format(*format::consts::FORMAT_NO_LINESEP_WITH_TITLE);
+        table.set_format(*prettytable::format::consts::FORMAT_NO_LINESEP_WITH_TITLE);
 
-        let header: Vec<_> = name_list.iter().map(|name| Cell::new(name)).collect();
+
+        let header: Vec<_> = name_list.iter().map(|n| {
+            let name = n.chars()
+                .map(|c| c.to_string() + "\n").collect::<String>();
+            let mut cell = Cell::new(&name);
+            cell.align(prettytable::format::Alignment::CENTER);
+            cell
+
+        }).collect();
 
         table.set_titles(Row::new(header));
 
