@@ -1,7 +1,7 @@
 use std::fs::File;
 use std::io::BufReader;
 
-use serde_json::{Value, to_string};
+use serde_json::Value;
 use prettytable::{Table, Row, Cell};
 
 use super::food::Food;
