@@ -22,8 +22,9 @@ impl FoodData {
                 if *number == 0.0 {
                     "-".to_string()
                 } else {
-                    number.to_string()
-
+                    let num = (*number * 100.0).round();
+                    let num = num / 100.0;
+                    num.to_string()
                 }
             },
             FoodData::String(string) => string.clone(),
