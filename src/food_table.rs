@@ -212,13 +212,20 @@ impl FoodTable {
 
         table.set_titles(Row::new(header));
 
-        for (_key, food) in &self.food_list {
+        for (key, food) in &self.food_list {
             let mut row = Vec::new();
-            for food_data in food.get_list(name_list) {
-                match food_data {
-                    Some(food_data) => row.push(Cell::new(&food_data.to_string())),
-                    None => row.push(Cell::new("-"))
+            for (food_data, name)
+                in food.get_list(name_list).iter().zip(name_list.iter()) {
+                let mut cell = match food_data {
+                    Some(food_data) => Cell::new(&food_data.to_string()),
+                    None => Cell::new("-")
+                };
+                if *name == "食品名" {
+                    cell.align(prettytable::format::Alignment::LEFT);
+                } else {
+                    cell.align(prettytable::format::Alignment::RIGHT);
                 }
+                row.push(cell);
             }
             table.add_row(Row::new(row));
         }
@@ -230,7 +237,9 @@ impl FoodTable {
             if *name == "食品名" {
                 row.push(Cell::new("合計"));
             } else {
-                row.push(Cell::new(&food_data.to_string()));
+                let mut cell = Cell::new(&food_data.to_string());
+                cell.align(prettytable::format::Alignment::RIGHT);
+                row.push(cell);
             }
         }
         table.add_row(Row::new(row));
