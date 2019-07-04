@@ -2,15 +2,25 @@ use std::io::{BufReader, Read};
 
 use serde_json::Value;
 
+use crate::kijun::{Gender, PAL};
 
 pub struct ParsedData {
     pub foods: Vec<ParsedFood>,
-    pub name_list: Vec<String>
+    pub name_list: Vec<String>,
+    pub body: Option<Body>
 }
 
 pub struct ParsedFood {
     pub number: String,
     pub weight: Option<f32>
+}
+
+pub struct Body {
+    age: usize,
+    weight: f32,
+    height: f32,
+    gender: Gender,
+    pal: PAL
 }
 
 fn parse_foods(data: &Value) -> Result<Vec<ParsedFood>, String> {
@@ -80,6 +90,84 @@ fn parse_name_list(data: &Value) -> Result<Vec<String>, String> {
     Ok(parsed_name_list)
 }
 
+fn parse_body(data: &Value) -> Result<Body, String> {
+    let obj = match data {
+        Value::Object(obj) => obj,
+        _ => return Err("bodyの値はオブジェクトにしてください".to_string())
+    };
+
+    let age = match obj.get("age") {
+        Some(value) => match value {
+            Value::Number(num) => match num.as_f64() {
+                Some(num) => num as usize,
+                _ => return Err("ageの値をf64に変換できません".to_string())
+            },
+            _ => return Err("ageの値は数値にしてください".to_string())
+        },
+        None => return Err("bodyにage属性がありません".to_string())
+    };
+
+    let weight = match obj.get("weight") {
+        Some(value) => match value {
+            Value::Number(num) => match num.as_f64() {
+                Some(num) => num as f32,
+                _ => return Err("weightの値をf64に変換できません".to_string())
+            },
+            _ => return Err("weightの値は数値にしてください".to_string())
+        },
+        None => return Err("bodyにweight属性がありません".to_string())
+    };
+
+    let height = match obj.get("height") {
+        Some(value) => match value {
+            Value::Number(num) => match num.as_f64() {
+                Some(num) => num as f32,
+                _ => return Err("heightの値をf64に変換できません".to_string())
+            },
+            _ => return Err("heightの値は数値にしてください".to_string())
+        },
+        None => return Err("bodyにheight属性がありません".to_string())
+    };
+
+    let gender = match obj.get("height") {
+        Some(value) => match value {
+            Value::String(gender) => match gender.as_str() {
+                "female" => Gender::Female,
+                "male" => Gender::Male,
+                _ => return Err("genderの値は文字列の \"female\" または \"male\"\
+                             にしてください".to_string())
+            },
+            _ => return Err("genderの値は文字列の \"female\" または \"male\"\
+                             にしてください".to_string())
+        },
+        None => return Err("bodyにgender属性がありません".to_string())
+    };
+
+    let pal = match obj.get("pal") {
+        Some(value) => match value {
+            Value::String(pal) => match pal.as_str() {
+                "low" => PAL::Low,
+                "moderate" => PAL::Moderate,
+                "high" => PAL::High,
+                _ => return Err("palの値は \"low\", \"moderate\", \"high\" \
+                             のいずれかの文字列にしてください".to_string())
+            },
+            _ => return Err("palの値は \"low\", \"moderate\", \"high\" \
+                             のいずれかの文字列にしてください".to_string())
+        },
+        None => return Err("bodyにpal属性がありません".to_string())
+    };
+
+
+    Ok(Body {
+        age,
+        weight,
+        height,
+        gender,
+        pal
+    })
+}
+
 pub fn parse_json<T: std::io::Read>(reader: BufReader<T>) -> Result<ParsedData, String> {
     let data: Value = match serde_json::from_reader(reader) {
         Ok(data) => data,
@@ -107,9 +195,18 @@ pub fn parse_json<T: std::io::Read>(reader: BufReader<T>) -> Result<ParsedData, 
         }
     };
 
+    let body = match obj.get("body") {
+        None => None,
+        Some(value) => match parse_body(value) {
+            Ok(body) => Some(body),
+            Err(e) => return Err(e)
+        }
+    };
+
 
     Ok(ParsedData {
         foods,
-        name_list
+        name_list,
+        body
     })
 }
