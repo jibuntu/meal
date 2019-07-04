@@ -218,6 +218,19 @@ impl Kijun {
         }
     }
 
+    fn get(&self, key: &str) -> Option<&KijunValue> {
+        self.data_list.get(key)
+    }
+
+    fn get_list(&self, keys: &[&str]) -> Vec<Option<&KijunValue>> {
+        let mut data_list = Vec::new();
+        for key in keys {
+            data_list.push(self.get(key))
+        }
+
+        data_list
+    }
+
     // 身体活動レベル
     fn get_pal(age: usize, pal: PAL) -> Result<f32, String> {
         let result = if age < 1 {
@@ -1078,6 +1091,4 @@ impl Kijun {
 
         Ok(KijunValue::Suisyo(result))
     }
-
-
 }
