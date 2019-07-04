@@ -295,6 +295,25 @@ impl FoodTable {
         table
     }
 
+    pub fn add_kijun_to_table(&self, table: &mut Table, name_list: &[&str], kijun: Kijun) {
+        // 摂取基準を追加する
+        let mut row = Vec::new();
+        let kijun_values = kijun.get_list(name_list);
+        for (name, value) in name_list.iter().zip(kijun_values.iter()) {
+            if *name == "食品名" {
+                row.push(Cell::new("摂取基準値"));
+            } else {
+                let data = match value {
+                    Some(v) => v.to_string(),
+                    None => "-".to_string()
+                };
+                let mut cell = Cell::new(&data);
+                cell.align(prettytable::format::Alignment::RIGHT);
+                row.push(cell);
+            }
+        }
+    }
+
     pub fn print(&self, name_list: &[&str]) {
         let mut table = self.get_table(name_list);
 
