@@ -255,6 +255,23 @@ impl FoodTable {
         table
     }
 
+    pub fn add_sum_to_table(&self, table: &mut Table, name_list: &[&str]) {
+        // 合計を追加する
+        let mut row = Vec::new();
+        let sum = self.get_sum(name_list);
+        for (name, food_data) in name_list.iter().zip(sum.iter()) {
+            if *name == "食品名" {
+                row.push(Cell::new("合計"));
+            } else {
+                let mut cell = Cell::new(&food_data.to_string());
+                cell.align(prettytable::format::Alignment::RIGHT);
+                row.push(cell);
+            }
+        }
+
+        table.add_row(Row::new(row));
+    }
+
     pub fn get_table_with_sum_and_kijun(&self, name_list: &[&str], kijun: Kijun) -> Table {
         let table = self.get_table_with_sum(name_list);
 
