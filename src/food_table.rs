@@ -236,6 +236,12 @@ impl FoodTable {
     pub fn print(&self, name_list: &[&str]) {
         let mut table = self.get_table(name_list);
 
+        table.printstd();
+    }
+
+    pub fn print_with_sum(&self, name_list: &[&str]) {
+        let mut table = self.get_table(name_list);
+
         // 合計を追加する
         let mut row = Vec::new();
         let sum = self.get_sum(name_list);
