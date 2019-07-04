@@ -16,11 +16,11 @@ pub struct ParsedFood {
 }
 
 pub struct Body {
-    age: usize,
-    weight: f32,
-    height: f32,
-    gender: Gender,
-    pal: PAL
+    pub age: usize,
+    pub weight: f32,
+    pub height: f32,
+    pub gender: Gender,
+    pub pal: PAL
 }
 
 fn parse_foods(data: &Value) -> Result<Vec<ParsedFood>, String> {

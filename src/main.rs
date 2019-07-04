@@ -11,6 +11,7 @@ mod parse_json;
 use food_table::FoodTable;
 use crate::food::FoodData;
 use parse_json::parse_json;
+use crate::kijun::Kijun;
 
 enum SearchType {
     Or,
@@ -115,7 +116,17 @@ fn calc(matches: &ArgMatches) -> Result<(), String>{
     }
 
     let list: Vec<_> = parsed_data.name_list.iter().map(|name| name.as_str()).collect();
-    food_table.print(&list);
+
+    if let Some(body) = parsed_data.body {
+        let kijun = Kijun::new(body.age,
+                               body.weight,
+                               body.height,
+                               body.gender,
+                               body.pal);
+        food_table.print_with_sum_and_kijun(&list, &kijun);
+    } else {
+        food_table.print_with_sum(&list);
+    }
 
     Ok(())
 }
