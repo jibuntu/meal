@@ -7,6 +7,7 @@ use serde_json::Value;
 
 mod food;
 mod food_table;
+mod kijun;
 use food_table::FoodTable;
 use crate::food::FoodData;
 
