@@ -129,7 +129,7 @@ fn parse_body(data: &Value) -> Result<Body, String> {
         None => return Err("bodyにheight属性がありません".to_string())
     };
 
-    let gender = match obj.get("height") {
+    let gender = match obj.get("gender") {
         Some(value) => match value {
             Value::String(gender) => match gender.as_str() {
                 "female" => Gender::Female,

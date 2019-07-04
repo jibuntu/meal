@@ -268,6 +268,8 @@ impl FoodTable {
                 row.push(cell);
             }
         }
+
+        table.add_row(Row::new(row));
     }
 
     pub fn print(&self, name_list: &[&str]) {
