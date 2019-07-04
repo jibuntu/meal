@@ -30,6 +30,29 @@ pub enum KijunValue {
     Measu(f32) // 値になるべく近い方が望ましいが、あくまで目安である
 }
 
+impl KijunValue {
+    pub fn to_string(&self) -> String {
+        match self {
+            KijunValue::Suisyo(value) => {
+                format!("= {}", (*value * 100.0).floor() / 100.0)
+            },
+            KijunValue::Less(value) => {
+                format!("- {}", (*value * 100.0).floor() / 100.0)
+            },
+            KijunValue::More(value) => {
+                format!("+ {}", (*value * 100.0).floor() / 100.0)
+            },
+            KijunValue::Range((min, max)) => {
+                format!("{} ~ {}", (*min * 100.0).floor() / 100.0,
+                                   (*max * 100.0).floor() / 100.0)
+            },
+            KijunValue::Measu(value) => {
+                format!("? {}", (*value * 100.0).floor() / 100.0)
+            },
+        }
+    }
+}
+
 
 #[derive(Copy, Clone)]
 pub enum PAL {
