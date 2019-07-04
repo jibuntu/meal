@@ -4,8 +4,9 @@ use std::io::BufReader;
 use serde_json::Value;
 use prettytable::{Table, Row, Cell};
 
-use super::food::Food;
+use crate::food::Food;
 use crate::food::FoodData;
+use crate::kijun::Kijun;
 use std::collections::HashMap;
 
 
@@ -250,6 +251,29 @@ impl FoodTable {
         }
 
         table.add_row(Row::new(row));
+
+        table
+    }
+
+    pub fn get_table_with_sum_and_kijun(&self, name_list: &[&str], kijun: Kijun) -> Table {
+        let table = self.get_table_with_sum(name_list);
+
+        // 摂取基準を追加する
+        let mut row = Vec::new();
+        let kijun_values = kijun.get_list(name_list);
+        for (name, value) in name_list.iter().zip(kijun_values.iter()) {
+            if *name == "食品名" {
+                row.push(Cell::new("摂取基準値"));
+            } else {
+                let data = match value {
+                    Some(v) => v.to_string(),
+                    None => "-".to_string()
+                };
+                let mut cell = Cell::new(&data);
+                cell.align(prettytable::format::Alignment::RIGHT);
+                row.push(cell);
+            }
+        }
 
         table
     }
