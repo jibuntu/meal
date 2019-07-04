@@ -251,7 +251,7 @@ impl FoodTable {
         table.add_row(Row::new(row));
     }
 
-    pub fn add_kijun_to_table(&self, table: &mut Table, name_list: &[&str], kijun: Kijun) {
+    pub fn add_kijun_to_table(&self, table: &mut Table, name_list: &[&str], kijun: &Kijun) {
         // 摂取基準を追加する
         let mut row = Vec::new();
         let kijun_values = kijun.get_list(name_list);
@@ -283,10 +283,10 @@ impl FoodTable {
         table.printstd();
     }
 
-    pub fn print_with_sum_and_kijun(&self, name_list: &[&str], kijun: Kijun) {
+    pub fn print_with_sum_and_kijun(&self, name_list: &[&str], kijun: &Kijun) {
         let mut table = self.get_table(name_list);
         self.add_sum_to_table(&mut table, name_list);
-        self.add_kijun_to_table(&mut table, name_list, kijun);
+        self.add_kijun_to_table(&mut table, name_list, &kijun);
 
         table.printstd();
     }
