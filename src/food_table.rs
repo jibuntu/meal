@@ -282,6 +282,14 @@ impl FoodTable {
 
         table.printstd();
     }
+
+    pub fn print_with_sum_and_kijun(&self, name_list: &[&str], kijun: Kijun) {
+        let mut table = self.get_table(name_list);
+        self.add_sum_to_table(&mut table, name_list);
+        self.add_kijun_to_table(&mut table, name_list, kijun);
+
+        table.printstd();
+    }
 }
 
 
