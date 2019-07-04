@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 
 enum PAL {
     Low,
@@ -11,7 +12,12 @@ enum Gender {
 }
 
 pub struct Kijun {
+    age: usize,
+    weight: f32,
+    height: f32,
+    gender: Gender,
     pal: PAL,
+    data_list: HashMap<String, KijunValue>
 }
 
 macro_rules! pal_match {
