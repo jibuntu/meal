@@ -196,7 +196,7 @@ impl FoodTable {
         food_table
     }
 
-    pub fn print(&self, name_list: &[&str]) {
+    pub fn get_table(&self, name_list: &[&str]) -> Table {
         let mut table = Table::new();
         table.set_format(*prettytable::format::consts::FORMAT_NO_LINESEP_WITH_TITLE);
 
@@ -229,6 +229,12 @@ impl FoodTable {
             }
             table.add_row(Row::new(row));
         }
+
+        table
+    }
+
+    pub fn print(&self, name_list: &[&str]) {
+        let mut table = self.get_table(name_list);
 
         // 合計を追加する
         let mut row = Vec::new();
