@@ -321,7 +321,8 @@ impl FoodTable {
     }
 
     pub fn print_with_sum(&self, name_list: &[&str]) {
-        let mut table = self.get_table_with_sum(name_list);
+        let mut table = self.get_table(name_list);
+        self.add_sum_to_table(&mut table, name_list);
 
         table.printstd();
     }
