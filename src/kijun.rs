@@ -1,11 +1,13 @@
 use std::collections::HashMap;
 
+#[derive(Copy, Clone)]
 enum PAL {
     Low,
     Moderate,
     High
 }
 
+#[derive(Copy, Clone)]
 enum Gender {
     Female,
     Male
@@ -40,6 +42,7 @@ macro_rules! gender_match {
     };
 }
 
+#[derive(Copy, Clone)]
 enum KijunValue {
     Suisyo(f32), // 値になるべく近い方が望ましい
     Less(f32), // この値より小さい方が望ましい
@@ -49,8 +52,174 @@ enum KijunValue {
 }
 
 impl Kijun {
+    fn new(age: usize,
+           weight: f32,
+           height: f32,
+           gender: Gender,
+           pal: PAL) -> Kijun {
+        let mut data_list: HashMap<String, KijunValue> = HashMap::new();
+
+        if let Ok(e) = Kijun::get_energy(weight, height, age, gender, pal) {
+            data_list.insert("エネルギー".to_string(), e);
+
+            let energy_val = match e {
+                KijunValue::Measu(energy_val) => energy_val,
+                _ => panic!("内部的なエラーです。\
+                                 energyのKijunValueの値が間違っています")
+            };
+
+            if let Ok(lipid) = Kijun::get_lipid(age, energy_val) {
+                data_list.insert("脂質".to_string(), lipid);
+            }
+
+            if let Ok(sfa) = Kijun::get_saturated_fatty_acid(age, energy_val) {
+                data_list.insert("飽和脂肪酸".to_string(), sfa);
+            }
+
+            if let Ok(ca) = Kijun::get_carbohydrate(age, energy_val) {
+                data_list.insert("炭水化物".to_string(), ca);
+            }
+        }
+
+        if let Ok(protein) = Kijun::get_protein(age, gender) {
+            data_list.insert("たんぱく質".to_string(), protein);
+        }
+        
+        if let Ok(n6_fatty_acid) = Kijun::get_n6_fatty_acid(age, gender) {
+            data_list.insert("n-6系脂肪酸".to_string(), n6_fatty_acid);
+        }
+        
+        if let Ok(n3_fatty_acid) = Kijun::get_n3_fatty_acid(age, gender) {
+            data_list.insert("n-3系脂肪酸".to_string(), n3_fatty_acid);
+        }
+
+        if let Ok(pufa) = Kijun::get_pufa(age, gender) {
+            data_list.insert("多価不飽和脂肪酸".to_string(), pufa);
+        }
+        
+        if let Ok(fiber) = Kijun::get_fiber(age, gender) {
+            data_list.insert("食物繊維".to_string(), fiber);
+            data_list.insert("食物繊維総量".to_string(), fiber);
+        }
+
+        if let Ok(vitamin_a) = Kijun::get_vitamin_a(age, gender) {
+            data_list.insert("ビタミンA".to_string(), vitamin_a);
+            data_list.insert("レチノール活性当量".to_string(), vitamin_a);
+        }
+
+        if let Ok(vitamin_d) = Kijun::get_vitamin_d(age, gender) {
+            data_list.insert("ビタミンD".to_string(), vitamin_d);
+        }
+
+        if let Ok(vitamin_e) = Kijun::get_vitamin_e(age, gender) {
+            data_list.insert("ビタミンE".to_string(), vitamin_e);
+            data_list.insert("α-トコフェロール".to_string(), vitamin_e);
+        }
+
+        if let Ok(vitamin_k) = Kijun::get_vitamin_k(age, gender) {
+            data_list.insert("ビタミンK".to_string(), vitamin_k);
+        }
+
+        if let Ok(vitamin_b1) = Kijun::get_vitamin_b1(age, gender) {
+            data_list.insert("ビタミンB1".to_string(), vitamin_b1);
+        }
+
+        if let Ok(vitamin_b2) = Kijun::get_vitamin_b2(age, gender) {
+            data_list.insert("ビタミンB2".to_string(), vitamin_b2);
+        }
+
+        if let Ok(niacin) = Kijun::get_niacin(age, gender) {
+            data_list.insert("ナイアシン".to_string(), niacin);
+        }
+
+        if let Ok(vitamin_b6) = Kijun::get_vitamin_b6(age, gender) {
+            data_list.insert("ビタミンB6".to_string(), vitamin_b6);
+        }
+
+        if let Ok(vitamin_b12) = Kijun::get_vitamin_b12(age, gender) {
+            data_list.insert("ビタミンB12".to_string(), vitamin_b12);
+        }
+
+        if let Ok(folic_acid) = Kijun::get_folic_acid(age, gender) {
+            data_list.insert("葉酸".to_string(), folic_acid);
+        }
+
+        if let Ok(pantothenic_acid) = Kijun::get_pantothenic_acid(age, gender) {
+            data_list.insert("パントテン酸".to_string(), pantothenic_acid);
+        }
+
+        if let Ok(biotin) = Kijun::get_biotin(age, gender) {
+            data_list.insert("ビオチン".to_string(), biotin);
+        }
+
+        if let Ok(vitamin_c) = Kijun::get_vitamin_c(age, gender) {
+            data_list.insert("ビタミンC".to_string(), vitamin_c);
+        }
+
+        if let Ok(sodium) = Kijun::get_sodium(age, gender) {
+            data_list.insert("ナトリウム".to_string(), sodium);
+        }
+
+        if let Ok(potassium) = Kijun::get_potassium(age, gender) {
+            data_list.insert("カリウム".to_string(), potassium);
+        }
+
+        if let Ok(calcium) = Kijun::get_calcium(age, gender) {
+            data_list.insert("カルシウム".to_string(), calcium);
+        }
+
+        if let Ok(magnesium) = Kijun::get_magnesium(age, gender) {
+            data_list.insert("マグネシウム".to_string(), magnesium);
+        }
+
+        if let Ok(phosphorus) = Kijun::get_phosphorus(age, gender) {
+            data_list.insert("リン".to_string(), phosphorus);
+        }
+
+        if let Ok(iron) = Kijun::get_iron(age, gender) {
+            data_list.insert("鉄".to_string(), iron);
+        }
+
+        if let Ok(zinc) = Kijun::get_zinc(age, gender) {
+            data_list.insert("亜鉛".to_string(), zinc);
+        }
+
+        if let Ok(copper) = Kijun::get_copper(age, gender) {
+            data_list.insert("銅".to_string(), copper);
+        }
+
+        if let Ok(manganese) = Kijun::get_manganese(age, gender) {
+            data_list.insert("マンガン".to_string(), manganese);
+        }
+
+        if let Ok(iodine) = Kijun::get_iodine(age, gender) {
+            data_list.insert("ヨウ素".to_string(), iodine);
+        }
+
+        if let Ok(selenium) = Kijun::get_selenium(age, gender) {
+            data_list.insert("セレン".to_string(), selenium);
+        }
+        
+        if let Ok(chromium) = Kijun::get_chromium(age, gender) {
+            data_list.insert("クロム".to_string(), chromium);
+        }
+
+        if let Ok(molybdenum) = Kijun::get_molybdenum(age, gender) {
+            data_list.insert("モリブデン".to_string(), molybdenum);
+        }
+
+        Kijun {
+            age,
+            weight,
+            height,
+            gender,
+            pal,
+            data_list
+        }
+    }
+
     // 身体活動レベル
-    fn get_pal(age: usize, pal: PAL) -> Result<KijunValue, String> {
+    fn get_pal(age: usize, pal: PAL) -> Result<f32, String> {
         let result = if age < 1 {
             return Err("年齢が１より小さい場合はPALの値を求めることはできません".to_string())
         } else if 1 <= age && age <= 2 {
@@ -85,28 +254,39 @@ impl Kijun {
             return Err("PALを求めることができません".to_string())
         };
 
-        return Ok(KijunValue::Suisyo(result))
+        return Ok(result)
     }
 
     // 基礎代謝量
     fn get_base_metabolism(weight: f32,
                            height: f32,
                            age: usize,
-                           gender: Gender) -> KijunValue {
-        KijunValue::Suisyo(gender_match!(gender,
+                           gender: Gender) -> f32 {
+        gender_match!(gender,
             (0.0481 * weight + 0.0234 * height - 0.0138 * age as f32 - 0.4235)
                     * 1000.0 / 4.186,
             (0.0481 * weight + 0.0234 * height - 0.0138 * age as f32 - 0.9708)
-                * 1000.0 / 4.186))
+                * 1000.0 / 4.186)
     }
 
     // エネルギー必要量（kcal）
-    fn get_energy(bm: f32, pal: f32, age: usize) -> Result<KijunValue, String> {
+    fn get_energy(weight: f32, 
+                  height: f32, 
+                  age: usize, 
+                  gender: Gender, 
+                  pal: PAL) -> Result<KijunValue, String> {
+        let pal_value = match Kijun::get_pal(age, pal) {
+            Ok(pal_value) => pal_value,
+            Err(e) => return Err(e)
+        };
+        
+        let bm = Kijun::get_base_metabolism(weight, height, age, gender);
+        
         if age <= 17 {
             return Err("17歳以下はエネルギー必要量を求めることができません".to_string())
         }
 
-        Ok(KijunValue::Suisyo(bm * pal))
+        Ok(KijunValue::Measu(bm * pal_value))
 
     }
 
@@ -204,6 +384,29 @@ impl Kijun {
         };
 
         Ok(KijunValue::Measu(result))
+    }
+
+    // 多価不飽和脂肪酸
+    fn get_pufa(age: usize, gender: Gender) -> Result<KijunValue, String> { 
+        let n6_fatty_acid = match Kijun::get_n6_fatty_acid(age, gender) {
+            Ok(kijun_value) => match kijun_value {
+                KijunValue::Measu(n6_fatty_acid) => n6_fatty_acid,
+                _ => panic!("内部的なエラー。\
+                             kijun_valueがMeasuではありません")
+            } 
+            Err(e) => return Err(e)
+        };
+
+        let n3_fatty_acid = match Kijun::get_n3_fatty_acid(age, gender) {
+            Ok(kijun_value) => match kijun_value {
+                KijunValue::Measu(n3_fatty_acid) => n3_fatty_acid,
+                _ => panic!("内部的なエラー。\
+                             kijun_valueがMeasuではありません")
+            }
+            Err(e) => return Err(e)
+        };
+
+        Ok(KijunValue::Measu(n6_fatty_acid + n3_fatty_acid))
     }
 
     // 炭水化物
