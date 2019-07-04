@@ -1,26 +1,5 @@
 use std::collections::HashMap;
 
-#[derive(Copy, Clone)]
-enum PAL {
-    Low,
-    Moderate,
-    High
-}
-
-#[derive(Copy, Clone)]
-enum Gender {
-    Female,
-    Male
-}
-
-pub struct Kijun {
-    age: usize,
-    weight: f32,
-    height: f32,
-    gender: Gender,
-    pal: PAL,
-    data_list: HashMap<String, KijunValue>
-}
 
 macro_rules! pal_match {
     ($pal:ident, $low:expr, $moderate:expr, $high:expr) => {
@@ -43,7 +22,7 @@ macro_rules! gender_match {
 }
 
 #[derive(Copy, Clone)]
-enum KijunValue {
+pub enum KijunValue {
     Suisyo(f32), // 値になるべく近い方が望ましい
     Less(f32), // この値より小さい方が望ましい
     More(f32), // この値より大きい方が望ましい
@@ -51,18 +30,41 @@ enum KijunValue {
     Measu(f32) // 値になるべく近い方が望ましいが、あくまで目安である
 }
 
+
+#[derive(Copy, Clone)]
+pub enum PAL {
+    Low,
+    Moderate,
+    High
+}
+
+#[derive(Copy, Clone)]
+pub enum Gender {
+    Female,
+    Male
+}
+
+pub struct Kijun {
+    age: usize,
+    weight: f32,
+    height: f32,
+    gender: Gender,
+    pal: PAL,
+    data_list: HashMap<String, KijunValue>
+}
+
 impl Kijun {
-    fn new(age: usize,
+    pub fn new(age: usize,
            weight: f32,
            height: f32,
            gender: Gender,
            pal: PAL) -> Kijun {
         let mut data_list: HashMap<String, KijunValue> = HashMap::new();
 
-        if let Ok(e) = Kijun::get_energy(weight, height, age, gender, pal) {
-            data_list.insert("エネルギー".to_string(), e);
+        if let Ok(energy_val) = Kijun::get_energy(weight, height, age, gender, pal) {
+            data_list.insert("エネルギー".to_string(), energy_val);
 
-            let energy_val = match e {
+            let energy_val = match energy_val {
                 KijunValue::Measu(energy_val) => energy_val,
                 _ => panic!("内部的なエラーです。\
                                  energyのKijunValueの値が間違っています")
@@ -218,11 +220,11 @@ impl Kijun {
         }
     }
 
-    fn get(&self, key: &str) -> Option<&KijunValue> {
+    pub fn get(&self, key: &str) -> Option<&KijunValue> {
         self.data_list.get(key)
     }
 
-    fn get_list(&self, keys: &[&str]) -> Vec<Option<&KijunValue>> {
+    pub fn get_list(&self, keys: &[&str]) -> Vec<Option<&KijunValue>> {
         let mut data_list = Vec::new();
         for key in keys {
             data_list.push(self.get(key))
@@ -232,7 +234,7 @@ impl Kijun {
     }
 
     // 身体活動レベル
-    fn get_pal(age: usize, pal: PAL) -> Result<f32, String> {
+    pub fn get_pal(age: usize, pal: PAL) -> Result<f32, String> {
         let result = if age < 1 {
             return Err("年齢が１より小さい場合はPALの値を求めることはできません".to_string())
         } else if 1 <= age && age <= 2 {
@@ -271,7 +273,7 @@ impl Kijun {
     }
 
     // 基礎代謝量
-    fn get_base_metabolism(weight: f32,
+    pub fn get_base_metabolism(weight: f32,
                            height: f32,
                            age: usize,
                            gender: Gender) -> f32 {
@@ -283,7 +285,7 @@ impl Kijun {
     }
 
     // エネルギー必要量（kcal）
-    fn get_energy(weight: f32, 
+    pub fn get_energy(weight: f32, 
                   height: f32, 
                   age: usize, 
                   gender: Gender, 
@@ -304,7 +306,7 @@ impl Kijun {
     }
 
     // たんぱく質
-    fn get_protein(age: usize, gender: Gender) -> Result<KijunValue, String>{
+    pub fn get_protein(age: usize, gender: Gender) -> Result<KijunValue, String>{
         let result = match age {
             0 => {
                 return Err("0歳以下はたんぱく質の推奨量を求めることができません".to_string())
@@ -329,7 +331,7 @@ impl Kijun {
     }
 
     // 脂質
-    fn get_lipid(age: usize, energy: f32) -> Result<KijunValue, String> {
+    pub fn get_lipid(age: usize, energy: f32) -> Result<KijunValue, String> {
         if age <= 0 {
             return Err("0歳以下は脂質の目標量を求めることができません".to_string())
         }
@@ -341,7 +343,7 @@ impl Kijun {
     }
 
     // 飽和脂肪酸
-    fn get_saturated_fatty_acid(age: usize, energy: f32) -> Result<KijunValue, String> {
+    pub fn get_saturated_fatty_acid(age: usize, energy: f32) -> Result<KijunValue, String> {
         if age <= 17 {
             return Err("17歳以下は飽和脂肪酸の目標量を求めることができません".to_string())
         }
@@ -350,7 +352,7 @@ impl Kijun {
     }
 
     // n-6系脂肪酸
-    fn get_n6_fatty_acid(age: usize, gender: Gender) -> Result<KijunValue, String> {
+    pub fn get_n6_fatty_acid(age: usize, gender: Gender) -> Result<KijunValue, String> {
         let result = match age {
             0 => {
                 return Err("0歳以下はn-6系脂肪酸の目安量を求めることができません".to_string())
@@ -375,7 +377,7 @@ impl Kijun {
     }
 
     // n-3系脂肪酸
-    fn get_n3_fatty_acid(age: usize, gender: Gender) -> Result<KijunValue, String> {
+    pub fn get_n3_fatty_acid(age: usize, gender: Gender) -> Result<KijunValue, String> {
         let result = match age {
             0 => {
                 return Err("0歳以下はn-3系脂肪酸の目安量を求めることができません".to_string())
@@ -400,7 +402,7 @@ impl Kijun {
     }
 
     // 多価不飽和脂肪酸
-    fn get_pufa(age: usize, gender: Gender) -> Result<KijunValue, String> { 
+    pub fn get_pufa(age: usize, gender: Gender) -> Result<KijunValue, String> { 
         let n6_fatty_acid = match Kijun::get_n6_fatty_acid(age, gender) {
             Ok(kijun_value) => match kijun_value {
                 KijunValue::Measu(n6_fatty_acid) => n6_fatty_acid,
@@ -423,7 +425,7 @@ impl Kijun {
     }
 
     // 炭水化物
-    fn get_carbohydrate(age: usize, energy: f32) -> Result<KijunValue, String> {
+    pub fn get_carbohydrate(age: usize, energy: f32) -> Result<KijunValue, String> {
         if age <= 0 {
             return Err("0歳以下は炭水化物の目標量を求めることができません".to_string())
         }
@@ -434,7 +436,7 @@ impl Kijun {
     }
 
     // 食物繊維
-    fn get_fiber(age: usize, gender: Gender) -> Result<KijunValue, String> {
+    pub fn get_fiber(age: usize, gender: Gender) -> Result<KijunValue, String> {
         let result = match age {
             0 ... 5 => {
                 return Err("5歳以下は食物繊維の目標量を求めることができません".to_string())
@@ -457,7 +459,7 @@ impl Kijun {
     }
 
     // ビタミンA
-    fn get_vitamin_a(age: usize, gender: Gender) -> Result<KijunValue, String> {
+    pub fn get_vitamin_a(age: usize, gender: Gender) -> Result<KijunValue, String> {
         let result = match age {
             0 => {
                 return Err("0歳以下はビタミンAの推奨量を求めることができません".to_string())
@@ -482,7 +484,7 @@ impl Kijun {
     }
 
     // ビタミンD
-    fn get_vitamin_d(age: usize, gender: Gender) -> Result<KijunValue, String> {
+    pub fn get_vitamin_d(age: usize, gender: Gender) -> Result<KijunValue, String> {
         let result = match age {
             0 => {
                 return Err("0歳以下はビタミンDの推奨量を求めることができません".to_string())
@@ -507,7 +509,7 @@ impl Kijun {
     }
 
     // ビタミンE
-    fn get_vitamin_e(age: usize, gender: Gender) -> Result<KijunValue, String> {
+    pub fn get_vitamin_e(age: usize, gender: Gender) -> Result<KijunValue, String> {
         let result = match age {
             0 => {
                 return Err("0歳以下はビタミンEの目安量を求めることができません".to_string())
@@ -532,7 +534,7 @@ impl Kijun {
     }
 
     // ビタミンK
-    fn get_vitamin_k(age: usize, gender: Gender) -> Result<KijunValue, String> {
+    pub fn get_vitamin_k(age: usize, gender: Gender) -> Result<KijunValue, String> {
         let result = match age {
             0 => {
                 return Err("0歳以下はビタミンKの目安量を求めることができません".to_string())
@@ -557,7 +559,7 @@ impl Kijun {
     }
 
     // ビタミンB1
-    fn get_vitamin_b1(age: usize, gender: Gender) -> Result<KijunValue, String> {
+    pub fn get_vitamin_b1(age: usize, gender: Gender) -> Result<KijunValue, String> {
         let result = match age {
             0 => {
                 return Err("0歳以下はビタミンB1の推奨量を求めることができません".to_string())
@@ -582,7 +584,7 @@ impl Kijun {
     }
 
     // ビタミンB2
-    fn get_vitamin_b2(age: usize, gender: Gender) -> Result<KijunValue, String> {
+    pub fn get_vitamin_b2(age: usize, gender: Gender) -> Result<KijunValue, String> {
         let result = match age {
             0 => {
                 return Err("0歳以下はビタミンB2の推奨量を求めることができません".to_string())
@@ -607,7 +609,7 @@ impl Kijun {
     }
 
     // ナイアシン
-    fn get_niacin(age: usize, gender: Gender) -> Result<KijunValue, String> {
+    pub fn get_niacin(age: usize, gender: Gender) -> Result<KijunValue, String> {
         let result = match age {
             0 => {
                 return Err("0歳以下はナイアシンの推奨量を求めることができません".to_string())
@@ -632,7 +634,7 @@ impl Kijun {
     }
 
     // ビタミンB6
-    fn get_vitamin_b6(age: usize, gender: Gender) -> Result<KijunValue, String> {
+    pub fn get_vitamin_b6(age: usize, gender: Gender) -> Result<KijunValue, String> {
         let result = match age {
             0 => {
                 return Err("0歳以下はビタミンB6の推奨量を求めることができません".to_string())
@@ -657,7 +659,7 @@ impl Kijun {
     }
 
     // ビタミンB12
-    fn get_vitamin_b12(age: usize, gender: Gender) -> Result<KijunValue, String> {
+    pub fn get_vitamin_b12(age: usize, gender: Gender) -> Result<KijunValue, String> {
         let result = match age {
             0 => {
                 return Err("0歳以下はビタミンB12の推奨量を求めることができません".to_string())
@@ -682,7 +684,7 @@ impl Kijun {
     }
     
     // 葉酸
-    fn get_folic_acid(age: usize, gender: Gender) -> Result<KijunValue, String> {
+    pub fn get_folic_acid(age: usize, gender: Gender) -> Result<KijunValue, String> {
         let result = match age {
             0 => {
                 return Err("0歳以下は葉酸の推奨量を求めることができません".to_string())
@@ -707,7 +709,7 @@ impl Kijun {
     }
 
     // パントテン酸
-    fn get_pantothenic_acid(age: usize, gender: Gender) -> Result<KijunValue, String> {
+    pub fn get_pantothenic_acid(age: usize, gender: Gender) -> Result<KijunValue, String> {
         let result = match age {
             0 => {
                 return Err("0歳以下はパントテン酸の目安量を求めることができません".to_string())
@@ -732,7 +734,7 @@ impl Kijun {
     }
 
     // ビオチン
-    fn get_biotin(age: usize, gender: Gender) -> Result<KijunValue, String> {
+    pub fn get_biotin(age: usize, gender: Gender) -> Result<KijunValue, String> {
         let result = match age {
             0 => {
                 return Err("0歳以下はビオチンの目安量を求めることができません".to_string())
@@ -757,7 +759,7 @@ impl Kijun {
     }
 
     // ビタミンC
-    fn get_vitamin_c(age: usize, gender: Gender) -> Result<KijunValue, String> {
+    pub fn get_vitamin_c(age: usize, gender: Gender) -> Result<KijunValue, String> {
         let result = match age {
             0 => {
                 return Err("0歳以下はビタミンCの推奨量を求めることができません".to_string())
@@ -782,7 +784,7 @@ impl Kijun {
     }
 
     // ナトリウム
-    fn get_sodium(age: usize, gender: Gender) -> Result<KijunValue, String> {
+    pub fn get_sodium(age: usize, gender: Gender) -> Result<KijunValue, String> {
         let result = match age {
             0 => {
                 return Err("0歳以下はナトリウムの目標量を求めることができません".to_string())
@@ -807,7 +809,7 @@ impl Kijun {
     }
 
     // カリウム
-    fn get_potassium(age: usize, gender: Gender) -> Result<KijunValue, String> {
+    pub fn get_potassium(age: usize, gender: Gender) -> Result<KijunValue, String> {
         let result = match age {
             0 => {
                 return Err("0歳以下はカリウムの目安量を求めることができません".to_string())
@@ -832,7 +834,7 @@ impl Kijun {
     }
 
     // カルシウム
-    fn get_calcium(age: usize, gender: Gender) -> Result<KijunValue, String> {
+    pub fn get_calcium(age: usize, gender: Gender) -> Result<KijunValue, String> {
         let result = match age {
             0 => {
                 return Err("0歳以下はカルシウムの推奨量を求めることができません".to_string())
@@ -857,7 +859,7 @@ impl Kijun {
     }
 
     // マグネシウム
-    fn get_magnesium(age: usize, gender: Gender) -> Result<KijunValue, String> {
+    pub fn get_magnesium(age: usize, gender: Gender) -> Result<KijunValue, String> {
         let result = match age {
             0 => {
                 return Err("0歳以下はマグネシウムの推奨量を求めることができません".to_string())
@@ -882,7 +884,7 @@ impl Kijun {
     }
 
     // リン
-    fn get_phosphorus(age: usize, gender: Gender) -> Result<KijunValue, String> {
+    pub fn get_phosphorus(age: usize, gender: Gender) -> Result<KijunValue, String> {
         let result = match age {
             0 => {
                 return Err("0歳以下はリンの目安量を求めることができません".to_string())
@@ -907,7 +909,7 @@ impl Kijun {
     }
 
     // 鉄
-    fn get_iron(age: usize, gender: Gender) -> Result<KijunValue, String> {
+    pub fn get_iron(age: usize, gender: Gender) -> Result<KijunValue, String> {
         let result = match age {
             0 => {
                 return Err("0歳以下は鉄の推奨量を求めることができません".to_string())
@@ -932,7 +934,7 @@ impl Kijun {
     }
 
     // 亜鉛
-    fn get_zinc(age: usize, gender: Gender) -> Result<KijunValue, String> {
+    pub fn get_zinc(age: usize, gender: Gender) -> Result<KijunValue, String> {
         let result = match age {
             0 => {
                 return Err("0歳以下は亜鉛の推奨量を求めることができません".to_string())
@@ -957,7 +959,7 @@ impl Kijun {
     }
 
     // 銅
-    fn get_copper(age: usize, gender: Gender) -> Result<KijunValue, String> {
+    pub fn get_copper(age: usize, gender: Gender) -> Result<KijunValue, String> {
         let result = match age {
             0 => {
                 return Err("0歳以下は銅の推奨量を求めることができません".to_string())
@@ -982,7 +984,7 @@ impl Kijun {
     }
 
     // マンガン
-    fn get_manganese(age: usize, gender: Gender) -> Result<KijunValue, String> {
+    pub fn get_manganese(age: usize, gender: Gender) -> Result<KijunValue, String> {
         let result = match age {
             0 => {
                 return Err("0歳以下はマンガンの目安量を求めることができません".to_string())
@@ -1007,7 +1009,7 @@ impl Kijun {
     }
 
     // ヨウ素
-    fn get_iodine(age: usize, gender: Gender) -> Result<KijunValue, String> {
+    pub fn get_iodine(age: usize, gender: Gender) -> Result<KijunValue, String> {
         let result = match age {
             0 => {
                 return Err("0歳以下はヨウ素の推奨量を求めることができません".to_string())
@@ -1032,7 +1034,7 @@ impl Kijun {
     }
 
     // セレン
-    fn get_selenium(age: usize, gender: Gender) -> Result<KijunValue, String> {
+    pub fn get_selenium(age: usize, gender: Gender) -> Result<KijunValue, String> {
         let result = match age {
             0 => {
                 return Err("0歳以下はセレンの推奨量を求めることができません".to_string())
@@ -1057,7 +1059,7 @@ impl Kijun {
     }
 
     // クロム
-    fn get_chromium(age: usize, gender: Gender) -> Result<KijunValue, String> {
+    pub fn get_chromium(age: usize, gender: Gender) -> Result<KijunValue, String> {
         let result = match age {
             0 ... 17 => {
                 return Err("17歳以下はクロムの目安量を求めることができません".to_string())
@@ -1075,7 +1077,7 @@ impl Kijun {
     }
 
     // モリブデン
-    fn get_molybdenum(age: usize, gender: Gender) -> Result<KijunValue, String> {
+    pub fn get_molybdenum(age: usize, gender: Gender) -> Result<KijunValue, String> {
         let result = match age {
             0 ... 17 => {
                 return Err("0歳以下はモリブデンの推奨量を求めることができません".to_string())

@@ -112,7 +112,7 @@ fn test_food_set_wight() {
 }
 
 #[test]
-fn test_food__get() {
+fn test_food_get() {
     let mut food = Food::new();
     food.set_weight(100.0);
     food.set("エネルギー", FoodData::Number(200.0));
