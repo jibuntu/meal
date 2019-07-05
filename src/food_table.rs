@@ -305,6 +305,39 @@ impl FoodTable {
         table.add_row(Row::new(row));
     }
 
+    pub fn add_kijun_percentage_to_table(&self,
+                                         table: &mut Table,
+                                         name_list: &[&str],
+                                         kijun: &Kijun) {
+        // 摂取基準に対する割合を追加する
+        let mut row = Vec::new();
+        let sum = self.get_sum(name_list);
+        let kijun_values = kijun.get_list(name_list);
+        let iter = name_list.iter().zip(kijun_values.iter()).zip(sum);
+        for ((name, kijun_value), food_data) in iter {
+            if *name == "食品名" {
+                row.push(Cell::new(&color("摂取基準に対する割合", "g+")));
+            } else {
+                let mut data = match food_data {
+                    FoodData::Number(num) => match kijun_value {
+                        Some(kijun_value) => {
+                            let per = kijun_value.get_percentage(num);
+                            format!("{:.0}%", per)
+                        },
+                        None => "-".to_string()
+                    },
+                    _ => "-".to_string()
+                };
+                let mut cell = Cell::new(&color(&data, "g+"));
+                cell.align(prettytable::format::Alignment::RIGHT);
+                row.push(cell);
+            }
+        }
+
+        table.add_row(Row::new(row));
+    }
+
+
     pub fn print(&self, name_list: &[&str]) {
         let mut table = self.get_table(name_list);
 
@@ -322,6 +355,7 @@ impl FoodTable {
         let mut table = self.get_table(name_list);
         self.add_sum_to_table(&mut table, name_list);
         self.add_kijun_to_table(&mut table, name_list, &kijun);
+        self.add_kijun_percentage_to_table(&mut table, name_list, &kijun);
 
         table.printstd();
     }
