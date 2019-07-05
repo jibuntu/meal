@@ -396,7 +396,7 @@ impl Kijun {
         let result_min = (energy * 0.20 / 9.0);
         let result_max = (energy * 0.30 / 9.0);
 
-        Ok(KijunValue::Range((result_min, result_min)))
+        Ok(KijunValue::Range((result_min, result_max)))
     }
 
     // 飽和脂肪酸
