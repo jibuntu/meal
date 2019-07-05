@@ -5,6 +5,7 @@ use std::str::FromStr;
 #[derive(Debug, PartialEq, Clone)]
 pub enum FoodData {
     Number(f32),
+    EstimatedNumber(f32),
     String(String),
 }
 
@@ -12,7 +13,13 @@ impl FoodData {
     pub fn from_str(data: &str) -> FoodData {
         match f32::from_str(data) {
             Ok(num) => FoodData::Number(num),
-            Err(_) => FoodData::String(data.to_string())
+            Err(_) => {
+                match f32::from_str(data.trim_start_matches("(")
+                                        .trim_end_matches(")")) {
+                    Ok(num) => FoodData::EstimatedNumber(num),
+                    Err(_) => FoodData::String(data.to_string())
+                }
+            }
         }
     }
 
@@ -27,6 +34,15 @@ impl FoodData {
                     num.to_string()
                 }
             },
+            FoodData::EstimatedNumber(number) => {
+                if *number == 0.0 {
+                    "(0)".to_string()
+                } else {
+                    let num = (*number * 100.0).round();
+                    let num = num / 100.0;
+                    "(".to_string() + &num.to_string() + ")"
+                }
+            }
             FoodData::String(string) => string.clone(),
             _ => "-".to_string()
         }
@@ -37,8 +53,49 @@ impl FoodData {
 #[test]
 fn test_food_data_from_str() {
     let food_data = FoodData::from_str("100");
-
     assert_eq!(food_data, FoodData::Number(100.0));
+
+    let food_data = FoodData::from_str("(100)");
+    assert_eq!(food_data, FoodData::EstimatedNumber(100.0));
+
+    let food_data = FoodData::from_str("(100.0)");
+    assert_eq!(food_data, FoodData::EstimatedNumber(100.0));
+
+    let food_data = FoodData::from_str("(0.1)");
+    assert_eq!(food_data, FoodData::EstimatedNumber(0.1));
+
+    let food_data = FoodData::from_str("(1.1)");
+    assert_eq!(food_data, FoodData::EstimatedNumber(1.1));
+
+    let food_data = FoodData::from_str("(0)");
+    assert_eq!(food_data, FoodData::EstimatedNumber(0.0));
+
+    let food_data = FoodData::from_str("(Tr)");
+    assert_eq!(food_data, FoodData::String("(Tr)".to_string()));
+}
+
+#[test]
+fn test_food_data_to_string() {
+    let food_data = FoodData::from_str("100");
+    assert_eq!(&food_data.to_string(), "100");
+
+    let food_data = FoodData::from_str("(100)");
+    assert_eq!(&food_data.to_string(), "(100)");
+
+    let food_data = FoodData::from_str("(100.0)");
+    assert_eq!(&food_data.to_string(), "(100)");
+
+    let food_data = FoodData::from_str("(0.1)");
+    assert_eq!(&food_data.to_string(), "(0.1)");
+
+    let food_data = FoodData::from_str("(1.1)");
+    assert_eq!(&food_data.to_string(), "(1.1)");
+
+    let food_data = FoodData::from_str("(0)");
+    assert_eq!(&food_data.to_string(), "(0)");
+
+    let food_data = FoodData::from_str("(Tr)");
+    assert_eq!(&food_data.to_string(), "(Tr)");
 }
 
 
@@ -75,7 +132,11 @@ impl Food {
             FoodData::Number(num) => {
                 let new_num = *num * (self.weight / Food::BASE_WEIGHT);
                 return Some(FoodData::Number(new_num))
-            }
+            },
+            FoodData::EstimatedNumber(num)=> {
+                let new_num = *num * (self.weight / Food::BASE_WEIGHT);
+                return Some(FoodData::EstimatedNumber(new_num))
+            },
         }
 
         None
@@ -116,13 +177,17 @@ fn test_food_get() {
     let mut food = Food::new();
     food.set_weight(100.0);
     food.set("エネルギー", FoodData::Number(200.0));
+    food.set("たんぱく質", FoodData::EstimatedNumber(200.0));
     assert_eq!(food.get("エネルギー"), Some(FoodData::Number(200.0)));
+    assert_eq!(food.get("たんぱく質"), Some(FoodData::EstimatedNumber(200.0)));
 
     food.set_weight(50.0);
     assert_eq!(food.get("エネルギー"), Some(FoodData::Number(100.0)));
+    assert_eq!(food.get("たんぱく質"), Some(FoodData::EstimatedNumber(100.0)));
 
     food.set_weight(25.0);
     assert_eq!(food.get("エネルギー"), Some(FoodData::Number(50.0)));
+    assert_eq!(food.get("たんぱく質"), Some(FoodData::EstimatedNumber(50.0)));
 
 
     food.set("食品名", FoodData::String("ネギ".to_string()));

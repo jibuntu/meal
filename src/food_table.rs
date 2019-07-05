@@ -158,8 +158,14 @@ impl FoodTable {
                     None => continue
                 };
 
-                if let FoodData::Number(data) = food_data {
-                    sum[index] += data;
+                match food_data {
+                    FoodData::Number(data) => {
+                        sum[index] += data;
+                    },
+                    FoodData::EstimatedNumber(data) => {
+                        sum[index] += data;
+                    },
+                    FoodData::String(_) => ()
                 }
             }
         }
@@ -320,6 +326,13 @@ impl FoodTable {
             } else {
                 let mut data = match food_data {
                     FoodData::Number(num) => match kijun_value {
+                        Some(kijun_value) => {
+                            let per = kijun_value.get_percentage(num);
+                            format!("{:.0}%", per)
+                        },
+                        None => "-".to_string()
+                    },
+                    FoodData::EstimatedNumber(num) => match kijun_value {
                         Some(kijun_value) => {
                             let per = kijun_value.get_percentage(num);
                             format!("{:.0}%", per)
