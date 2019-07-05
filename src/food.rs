@@ -27,7 +27,7 @@ impl FoodData {
         match self {
             FoodData::Number(number) => {
                 if *number == 0.0 {
-                    "-".to_string()
+                    "0".to_string()
                 } else {
                     let num = (*number * 100.0).round();
                     let num = num / 100.0;
