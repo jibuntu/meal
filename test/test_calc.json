@@ -1,6 +1,6 @@
 {
     "foods": [
-	{"number": "04047", "weight": 80},
+	{"number": "04047"},
 	{"number": "01083", "weight": 112},
 	{"number": "12004", "weight": 50}
     ],
