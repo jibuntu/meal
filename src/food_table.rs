@@ -2,7 +2,7 @@ use std::fs::File;
 use std::io::BufReader;
 
 use serde_json::Value;
-use prettytable::{Table, Row, Cell};
+use prettytable::{Table, Row, Cell, Attr};
 
 use crate::food::Food;
 use crate::food::FoodData;
@@ -22,6 +22,38 @@ const KEY_LIST: [&str;68] = ["食品群", "食品番号", "索引番号", "食�
 "ビタミンB2", "ナイアシン", "ビタミンB6", "ビタミンB12", "葉酸", "パントテン酸", "ビオチン",
 "ビタミンC", "食塩相当量", "アルコール", "硝酸イオン", "テオブロミン", "カフェイン",
 "タンニン", "ポリフェノール", "酢酸", "調理油", "有機酸", "重量変化率", "備考"];
+
+fn color(text: &str, style: &str) -> String {
+    let mut colored_text = String::new();
+    let unset_style = "\x1b[0m";
+
+    for c in style.chars() {
+        let color_style = match c {
+            'd' => "\x1b[30m",
+            'r' => "\x1b[31m",
+            'g' => "\x1b[32m",
+            'y' => "\x1b[33m",
+            'b' => "\x1b[34m",
+            'm' => "\x1b[35m",
+            'c' => "\x1b[36m",
+            'w' => "\x1b[37m",
+            'D' => "\x1b[90m",
+            'R' => "\x1b[91m",
+            'G' => "\x1b[92m",
+            'Y' => "\x1b[93m",
+            'B' => "\x1b[94m",
+            'M' => "\x1b[95m",
+            'C' => "\x1b[96m",
+            'W' => "\x1b[97m",
+            '+' => "\x1b[1m",
+            _ => continue
+        };
+
+        colored_text += color_style;
+    }
+
+    colored_text + text + unset_style
+}
 
 pub struct FoodTable {
     food_list: Vec<(String, Food)>,
@@ -240,12 +272,13 @@ impl FoodTable {
         let sum = self.get_sum(name_list);
         for (name, food_data) in name_list.iter().zip(sum.iter()) {
             if *name == "食品名" {
-                row.push(Cell::new("合計"));
+                row.push(Cell::new(&color("合計", "y+")));
             } else {
-                let mut cell = Cell::new(&food_data.to_string());
+                let mut cell = Cell::new(&color(&food_data.to_string(), "y+"));
                 cell.align(prettytable::format::Alignment::RIGHT);
                 row.push(cell);
             }
+
         }
 
         table.add_row(Row::new(row));
@@ -257,13 +290,13 @@ impl FoodTable {
         let kijun_values = kijun.get_list(name_list);
         for (name, value) in name_list.iter().zip(kijun_values.iter()) {
             if *name == "食品名" {
-                row.push(Cell::new("摂取基準値"));
+                row.push(Cell::new(&color("摂取基準値", "c+")));
             } else {
                 let data = match value {
                     Some(v) => v.to_string(),
                     None => "-".to_string()
                 };
-                let mut cell = Cell::new(&data);
+                let mut cell = Cell::new(&color(&data, "c+"));
                 cell.align(prettytable::format::Alignment::RIGHT);
                 row.push(cell);
             }
