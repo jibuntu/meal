@@ -24,30 +24,64 @@ macro_rules! gender_match {
 #[derive(Copy, Clone)]
 pub enum KijunValue {
     Suisyo(f32), // 値になるべく近い方が望ましい
+    Measu(f32), // 値になるべく近い方が望ましいが、あくまで目安である
     Less(f32), // この値より小さい方が望ましい
     More(f32), // この値より大きい方が望ましい
     Range((f32, f32)), // (mix, max) この値の範囲ないが望ましい
-    Measu(f32) // 値になるべく近い方が望ましいが、あくまで目安である
 }
 
 impl KijunValue {
     pub fn to_string(&self) -> String {
         match self {
-            KijunValue::Suisyo(value) => {
-                format!("= {}", (*value * 100.0).floor() / 100.0)
+            KijunValue::Suisyo(kijun_value) => {
+                format!("= {}", (*kijun_value * 100.0).floor() / 100.0)
             },
-            KijunValue::Less(value) => {
-                format!("- {}", (*value * 100.0).floor() / 100.0)
+            KijunValue::Measu(kijun_value) => {
+                format!("? {}", (*kijun_value * 100.0).floor() / 100.0)
             },
-            KijunValue::More(value) => {
-                format!("+ {}", (*value * 100.0).floor() / 100.0)
+            KijunValue::Less(kijun_value) => {
+                format!("- {}", (*kijun_value * 100.0).floor() / 100.0)
+            },
+            KijunValue::More(kijun_value) => {
+                format!("+ {}", (*kijun_value * 100.0).floor() / 100.0)
             },
             KijunValue::Range((min, max)) => {
                 format!("{} ~ {}", (*min * 100.0).floor() / 100.0,
                                    (*max * 100.0).floor() / 100.0)
             },
-            KijunValue::Measu(value) => {
-                format!("? {}", (*value * 100.0).floor() / 100.0)
+        }
+    }
+    
+    pub fn get_percentage(&self, value: f32) -> f32 {
+        match self {
+            KijunValue::Suisyo(kijun_value) => {
+                (value / *kijun_value) * 100.0
+            },
+            KijunValue::Measu(kijun_value) => {
+                (value / *kijun_value) * 100.0
+            },
+            KijunValue::Less(kijun_value) => {
+                if value <= *kijun_value {
+                    100.0
+                } else {
+                    (value / *kijun_value) * 100.0
+                }
+            },
+            KijunValue::More(kijun_value) => {
+                if *kijun_value <= value {
+                    100.0
+                } else {
+                    (value / *kijun_value) * 100.0
+                }
+            },
+            KijunValue::Range((min, max)) => {
+                if value < *min {
+                    (value / *min) * 100.0
+                } else if *max < value {
+                    (value / *max) * 100.0
+                } else {
+                    100.0
+                }
             },
         }
     }
