@@ -279,6 +279,10 @@ impl FoodTable {
         for (name, food_data) in name_list.iter().zip(sum.iter()) {
             if *name == "食品名" {
                 row.push(Cell::new(&color("合計", "y+")));
+            } else if *name == "食品番号" || *name == "食品群" || *name == "重量" {
+                let mut cell = Cell::new(&color("-", "y+"));
+                cell.align(prettytable::format::Alignment::RIGHT);
+                row.push(cell);
             } else {
                 let mut cell = Cell::new(&color(&food_data.to_string(), "y+"));
                 cell.align(prettytable::format::Alignment::RIGHT);
