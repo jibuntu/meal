@@ -34,20 +34,39 @@ impl KijunValue {
     pub fn to_string(&self) -> String {
         match self {
             KijunValue::Suisyo(kijun_value) => {
-                format!("= {}", (*kijun_value * 100.0).floor() / 100.0)
+                if 30.0 < *kijun_value {
+                    format!("= {}", (kijun_value.round() * 100.0).floor() / 100.0)
+                } else {
+                    format!("= {}", (*kijun_value * 100.0).floor() / 100.0)
+                }
             },
             KijunValue::Measu(kijun_value) => {
-                format!("? {}", (*kijun_value * 100.0).floor() / 100.0)
+                if 30.0 < *kijun_value {
+                    format!("? {}", (kijun_value.round() * 100.0).floor() / 100.0)
+                } else {
+                    format!("? {}", (*kijun_value * 100.0).floor() / 100.0)
+                }
             },
             KijunValue::Less(kijun_value) => {
-                format!("- {}", (*kijun_value * 100.0).floor() / 100.0)
+                if 30.0 < *kijun_value {
+                    format!("- {}", (kijun_value.round() * 100.0).floor() / 100.0)
+                } else {
+                    format!("- {}", (*kijun_value * 100.0).floor() / 100.0)
+                }
             },
             KijunValue::More(kijun_value) => {
-                format!("+ {}", (*kijun_value * 100.0).floor() / 100.0)
+                if 30.0 < *kijun_value {
+                    format!("+ {}", (kijun_value.round() * 100.0).floor() / 100.0)
+                } else {
+                    format!("+ {}", (*kijun_value * 100.0).floor() / 100.0)
+                }
             },
             KijunValue::Range((min, max)) => {
-                format!("{} ~ {}", (*min * 100.0).floor() / 100.0,
-                                   (*max * 100.0).floor() / 100.0)
+                let min_value = if 30.0 < *min { min.round() } else { *min };
+                let max_value = if 30.0 < *max { max.round() } else { *max };
+                format!("{} ~ {}", (min_value * 100.0).floor() / 100.0,
+                       (max_value * 100.0).floor() / 100.0)
+
             },
         }
     }
