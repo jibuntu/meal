@@ -435,7 +435,7 @@ fn test_food_table_get_sum() {
     let sum = food_table.get_sum(&["たんぱく質"]);
     assert_eq!(sum[0].to_string(), "42.7");
     let sum = food_table.get_sum(&["食品名"]);
-    assert_eq!(sum[0].to_string(), "-");
+    assert_eq!(sum[0].to_string(), "0");
 }
 
 #[test]
