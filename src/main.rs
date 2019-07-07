@@ -205,6 +205,14 @@ fn main() {
                 .takes_value(true)
                 .required(true)
                 .help("ファイルを指定します")))
+        .subcommand(SubCommand::with_name("automatic-selection")
+            .visible_alias("a")
+            .setting(AppSettings::DeriveDisplayOrder)
+            .about("自動的に食材を選択します")
+            .arg(Arg::with_name("file")
+                .takes_value(true)
+                .required(true)
+                .help("ファイルを指定します")))
         .get_matches();
 
     let result = if let Some(matches) = matches.subcommand_matches("search") {
