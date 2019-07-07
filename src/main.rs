@@ -8,6 +8,7 @@ mod food;
 mod food_table;
 mod kijun;
 mod parse_json;
+mod automatic_selection;
 use food_table::FoodTable;
 use crate::food::FoodData;
 use parse_json::parse_json;
@@ -219,6 +220,8 @@ fn main() {
         search(matches)
     } else if let Some(matches) = matches.subcommand_matches("calc") {
         calc(matches)
+    } else if let Some(matches) = matches.subcommand_matches("automatic-selection") {
+        automatic_selection::automatic_selection(matches)
     } else {
         Err("サブコマンドが間違っています".to_string())
     };
