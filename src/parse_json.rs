@@ -7,7 +7,7 @@ use crate::kijun::{Gender, PAL};
 pub struct ParsedData {
     pub foods: Vec<ParsedFood>,
     pub name_list: Vec<String>,
-    pub body: Option<Body>
+    pub body: Body
 }
 
 pub struct ParsedFood {
@@ -196,9 +196,9 @@ pub fn parse_json<T: std::io::Read>(reader: BufReader<T>) -> Result<ParsedData, 
     };
 
     let body = match obj.get("body") {
-        None => None,
+        None => return Err("body属性がありません".to_string()),
         Some(value) => match parse_body(value) {
-            Ok(body) => Some(body),
+            Ok(body) => body,
             Err(e) => return Err(e)
         }
     };

@@ -140,16 +140,12 @@ fn calc(matches: &ArgMatches) -> Result<(), String>{
 
     let list: Vec<_> = parsed_data.name_list.iter().map(|name| name.as_str()).collect();
 
-    if let Some(body) = parsed_data.body {
-        let kijun = Kijun::new(body.age,
-                               body.weight,
-                               body.height,
-                               body.gender,
-                               body.pal);
-        food_table.print_with_sum_and_kijun(&list, &kijun);
-    } else {
-        food_table.print_with_sum(&list);
-    }
+    let kijun = Kijun::new(parsed_data.body.age,
+                           parsed_data.body.weight,
+                           parsed_data.body.height,
+                           parsed_data.body.gender,
+                           parsed_data.body.pal);
+    food_table.print_with_sum_and_kijun(&list, &kijun);
 
     Ok(())
 }
