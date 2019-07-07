@@ -23,7 +23,7 @@ pub struct Body {
     pub pal: PAL
 }
 
-fn parse_foods(data: &Value) -> Result<Vec<ParsedFood>, String> {
+pub fn parse_foods(data: &Value) -> Result<Vec<ParsedFood>, String> {
     let food_list = match data {
         Value::Array(food_list) => food_list,
         _ => return Err("foodsの値はオブジェクトの配列にしてください".to_string())
@@ -71,7 +71,7 @@ fn parse_foods(data: &Value) -> Result<Vec<ParsedFood>, String> {
     Ok(parsed_foods)
 }
 
-fn parse_name_list(data: &Value) -> Result<Vec<String>, String> {
+pub fn parse_name_list(data: &Value) -> Result<Vec<String>, String> {
     let mut parsed_name_list = Vec::new();
     let name_list = match data {
         Value::Array(name_list) => name_list,
@@ -90,7 +90,7 @@ fn parse_name_list(data: &Value) -> Result<Vec<String>, String> {
     Ok(parsed_name_list)
 }
 
-fn parse_body(data: &Value) -> Result<Body, String> {
+pub fn parse_body(data: &Value) -> Result<Body, String> {
     let obj = match data {
         Value::Object(obj) => obj,
         _ => return Err("bodyの値はオブジェクトにしてください".to_string())
