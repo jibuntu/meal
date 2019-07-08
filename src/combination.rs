@@ -1,22 +1,22 @@
-struct Combination<T> {
+pub struct Combination<T> {
     data_list: Vec<T>,
     length_of_combination: usize
 }
 
 impl<T> Combination<T> {
-    fn new(data_list: Vec<T>, length_of_combination: usize) -> Combination<T> {
+    pub fn new(data_list: Vec<T>, length_of_combination: usize) -> Combination<T> {
         Combination {
             data_list,
             length_of_combination
         }
     }
 
-    fn iter(&self) -> CombIterator<T> {
+    pub fn iter(&self) -> CombIterator<T> {
         CombIterator::new(self)
     }
 }
 
-struct CombIterator<'a, T> {
+pub struct CombIterator<'a, T> {
     comb: &'a Combination<T>,
     keys_list: Vec<Vec<usize>>
 }
