@@ -9,6 +9,7 @@ mod food_table;
 mod kijun;
 mod parse_json;
 mod automatic_selection;
+mod combination;
 use food_table::FoodTable;
 use crate::food::FoodData;
 use parse_json::parse_json;
