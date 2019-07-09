@@ -107,4 +107,14 @@ fn test_comb_iterator() {
     assert_eq!(iter.next(), Some(Rc::new(vec![&3, &2, &1])));
 
     assert_eq!(iter.next(), None);
+
+    let data_list = vec![1, 2, 3, 4, 5];
+    let comb = Combination::new(data_list, 3);
+    let list: Vec<usize> = comb.iter().map(|c| 0).collect();
+    assert_eq!(list.len(), (5 * 4 * 3) / (3 * 2 * 1));
+
+    let data_list = vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    let comb = Combination::new(data_list, 5);
+    let list: Vec<usize> = comb.iter().map(|c| 0).collect();
+    assert_eq!(list.len(), (10 * 9 * 8 * 7 * 6) / (5 * 4 * 3 * 2 * 1));
 }
