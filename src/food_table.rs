@@ -1,5 +1,6 @@
 use std::fs::File;
 use std::io::BufReader;
+use std::slice::Iter;
 
 use serde_json::Value;
 use prettytable::{Table, Row, Cell, Attr};
@@ -125,6 +126,10 @@ impl FoodTable {
         }
 
         Ok(food_table)
+    }
+
+    pub fn iter(&self) -> Iter<(String, Food)> {
+        self.food_list.iter()
     }
 
     pub fn get(&self, search_key: &str) -> Option<&Food> {
@@ -409,6 +414,16 @@ fn test_food_table_from_json() {
     }
     let food = food_table.get("01001").unwrap();
     assert_eq!(food.get("食品群").unwrap(), FoodData::String("01".to_string()));
+}
+
+#[test]
+fn test_food_table_iter() {
+    let food_table = FoodTable::from_json("./test/test_foods.json").unwrap();
+    for (s, f) in food_table.iter() {
+        for (s, f) in food_table.iter() {
+            food_table.get_sum(&["食品名"]);
+        }
+    }
 }
 
 #[test]
