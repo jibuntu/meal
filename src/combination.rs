@@ -45,7 +45,7 @@ impl<'a, T> CombIterator<'a, T> {
         }
     }
 
-    fn _change_keys_list(&mut self) {
+    fn change_keys_list(&mut self) {
         self.keys_list[self.keys_list_len - 1] -= 1;
         if self.keys_list[self.keys_list_len - 1] != 0 {
             return;
@@ -81,7 +81,7 @@ impl<'a, T: 'a> Iterator for CombIterator<'a, T> {
             }
             result[index] = &self.comb.data_list[*key-1];
         }
-        self._change_keys_list();
+        self.change_keys_list();
 
         Some(Rc::clone(&self.result))
     }
