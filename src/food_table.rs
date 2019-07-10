@@ -165,10 +165,10 @@ impl FoodTable {
 
                 match food_data {
                     FoodData::Number(data) => {
-                        sum[index] += data;
+                        sum[index] += *data;
                     },
                     FoodData::EstimatedNumber(data) => {
-                        sum[index] += data;
+                        sum[index] += *data;
                     },
                     FoodData::String(_) | FoodData::None => ()
                 }
