@@ -6,7 +6,7 @@ use serde_json::Value;
 use prettytable::{Table, Row, Cell, Attr};
 
 use crate::food::Food;
-use crate::food::FoodData;
+use crate::food::food_data::FoodData;
 use crate::kijun::Kijun;
 use std::collections::HashMap;
 
@@ -121,7 +121,7 @@ impl FoodTable {
             }
 
 
-            food.set("重量", FoodData::String("100".to_string()));
+            food.set("重量", FoodData::Number(100.0));
             food_table.add(food)
         }
 
@@ -170,7 +170,7 @@ impl FoodTable {
                     FoodData::EstimatedNumber(data) => {
                         sum[index] += data;
                     },
-                    FoodData::String(_) => ()
+                    FoodData::String(_) | FoodData::None => ()
                 }
             }
         }
@@ -180,8 +180,9 @@ impl FoodTable {
 
     pub fn set_weight(&mut self, weight: f32) {
         for (key, food) in &mut self.food_list {
-            food.set_weight(weight);
-            food.set("重量", FoodData::String(weight.to_string()));
+            if let Some(new_food) = food.change_weight(weight) {
+                *food = new_food;
+            }
         }
     }
 
@@ -398,8 +399,8 @@ fn test_food_table_add() {
     food_table.add(food);
 
     let food = &food_table.food_list[0].1;
-    assert_eq!(food.get("食品名"), Some(FoodData::from_str("麦ごはん")));
-    assert_eq!(food.get("食品群"), None);
+    assert_eq!(food.get("食品名"), Some(&FoodData::from_str("麦ごはん")));
+    assert_eq!(food.get("食品群"), Some(&FoodData::None));
 }
 
 #[test]
@@ -413,7 +414,7 @@ fn test_food_table_from_json() {
         }
     }
     let food = food_table.get("01001").unwrap();
-    assert_eq!(food.get("食品群").unwrap(), FoodData::String("01".to_string()));
+    assert_eq!(food.get("食品群").unwrap(), &FoodData::String("01".to_string()));
 }
 
 #[test]
@@ -430,7 +431,7 @@ fn test_food_table_iter() {
 fn test_food_table_get() {
     let food_table = FoodTable::from_json("./test/test_foods.json").unwrap();
     let food = food_table.get("01001").unwrap();
-    assert_eq!(food.get("食品名").unwrap(), FoodData::String("アマランサス　玄穀".to_string()))
+    assert_eq!(food.get("食品名").unwrap(), &FoodData::String("アマランサス　玄穀".to_string()))
 }
 
 #[test]
@@ -451,6 +452,15 @@ fn test_food_table_get_sum() {
     assert_eq!(sum[0].to_string(), "42.7");
     let sum = food_table.get_sum(&["食品名"]);
     assert_eq!(sum[0].to_string(), "0");
+}
+
+#[test]
+fn test_food_table_set_weight() {
+    let mut food_table = FoodTable::from_json("./test/test_foods.json").unwrap();
+    assert_eq!(food_table.get("01001").unwrap().get("重量"), Some(&FoodData::Number(100.0)));
+
+    food_table.set_weight(50.0);
+    assert_eq!(food_table.get("01001").unwrap().get("重量"), Some(&FoodData::Number(50.0)))
 }
 
 #[test]

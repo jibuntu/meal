@@ -11,7 +11,7 @@ mod parse_json;
 mod automatic_selection;
 mod combination;
 use food_table::FoodTable;
-use crate::food::FoodData;
+use food::food_data::FoodData;
 use parse_json::parse_json;
 use crate::kijun::Kijun;
 
@@ -130,12 +130,10 @@ fn calc(matches: &ArgMatches) -> Result<(), String>{
     let mut food_table = FoodTable::new();
     for parsed_food in parsed_data.foods {
         let mut food = match foods.get(&parsed_food.number) {
-            Some(food) => food.clone(),
+            Some(food) => food.change_weight(parsed_food.weight.unwrap_or(100.0)).unwrap(),
             None => return Err(format!("{}番の食材はありません。JSONの値が間違っています", &parsed_food.number))
         };
 
-        food.set_weight(parsed_food.weight.unwrap_or(100.0));
-        food.set("重量", FoodData::String(parsed_food.weight.unwrap_or(100.0).to_string()));
         food_table.add(food);
     }
 
