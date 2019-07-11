@@ -4,10 +4,20 @@ use serde_json::Value;
 
 use crate::kijun::{Gender, PAL};
 
+macro_rules! value_or_error {
+    ($option:expr, $error:expr) => {
+        match $option {
+            Some(value) => value,
+            None => return Err($error .to_string())
+        }
+    };
+}
+
 pub struct ParsedData {
     pub foods: Vec<ParsedFood>,
     pub name_list: Vec<String>,
-    pub body: Body
+    pub body: Body,
+    pub comb: Option<Vec<usize>>
 }
 
 pub struct ParsedFood {
@@ -168,6 +178,18 @@ pub fn parse_body(data: &Value) -> Result<Body, String> {
     })
 }
 
+pub fn parse_combination(data: &Value) -> Result<Vec<usize>, String> {
+    let mut values = Vec::new();
+    let arr = value_or_error!(data.as_array(), "combinationの値は配列にしてください");
+
+    for value in arr {
+        let num = value_or_error!(value.as_i64(), "combinationの配列の値は数値にしてください");
+        values.push(num as usize);
+    }
+
+    Ok(values)
+}
+
 pub fn parse_json<T: std::io::Read>(reader: BufReader<T>) -> Result<ParsedData, String> {
     let data: Value = match serde_json::from_reader(reader) {
         Ok(data) => data,
@@ -203,10 +225,19 @@ pub fn parse_json<T: std::io::Read>(reader: BufReader<T>) -> Result<ParsedData, 
         }
     };
 
+    let comb = match obj.get("combination") {
+        None => None,
+        Some(value) => match parse_combination(value) {
+            Ok(comb) => Some(comb),
+            Err(e) => return Err(e)
+        }
+    };
+
 
     Ok(ParsedData {
         foods,
         name_list,
-        body
+        body,
+        comb
     })
 }
