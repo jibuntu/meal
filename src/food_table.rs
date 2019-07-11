@@ -7,7 +7,7 @@ use prettytable::{Table, Row, Cell, Attr};
 
 use crate::food::Food;
 use crate::food::food_data::FoodData;
-use crate::kijun::Kijun;
+use crate::kijun::{Kijun, Gender, PAL};
 use std::collections::HashMap;
 
 
@@ -23,6 +23,15 @@ const KEY_LIST: [&str;68] = ["食品群", "食品番号", "索引番号", "食�
 "ビタミンB2", "ナイアシン", "ビタミンB6", "ビタミンB12", "葉酸", "パントテン酸", "ビオチン",
 "ビタミンC", "食塩相当量", "アルコール", "硝酸イオン", "テオブロミン", "カフェイン",
 "タンニン", "ポリフェノール", "酢酸", "調理油", "有機酸", "重量変化率", "備考"];
+
+const KIJUN_KEY_LIST: [&str;32] = [
+    "エネルギー", "たんぱく質", "脂質",
+    "多価不飽和脂肪酸", "炭水化物", "食物繊維総量", "レチノール活性当量",
+    "ビタミンD", "α-トコフェロール", "ビタミンK", "ビタミンB1", "ビタミンB2",
+    "ナイアシン", "ビタミンB6", "ビタミンB12", "葉酸", "パントテン酸", "ビオチン",
+    "ビタミンC", "ナトリウム", "カリウム", "カルシウム", "マグネシウム", "リン",
+    "鉄", "亜鉛", "銅", "マンガン", "ヨウ素", "セレン", "クロム", "モリブデン"
+];
 
 fn color(text: &str, style: &str) -> String {
     let mut colored_text = String::new();
@@ -359,6 +368,34 @@ impl FoodTable {
 
         table.printstd();
     }
+
+    pub fn percentage_of_kijun(&self, kijun: &Kijun) -> Option<f32> {
+        let kijun_data_list = kijun.get_list(&KIJUN_KEY_LIST);
+        let sum = self.get_sum();
+        let sum_value_list = sum.get_list(&KIJUN_KEY_LIST);
+        let mut sum_percentage = 0.0;
+
+        for (kijun_data, sum_value) in kijun_data_list.iter().zip(sum_value_list.iter()) {
+            if let &None = kijun_data { return None }
+            let kijun_data = kijun_data.unwrap();
+
+            if let &None = sum_value { return None }
+            let sum_value = sum_value.unwrap();
+
+            if let None = sum_value.get_number() { return None }
+            let num = sum_value.get_number().unwrap();
+
+            let mut percentage = kijun_data.get_percentage(*num);
+            if 100.0 < percentage {
+                percentage = 100.0;
+            }
+
+            sum_percentage += percentage;
+        }
+
+        let percentage = sum_percentage / KIJUN_KEY_LIST.len() as f32;
+        Some(percentage)
+    }
 }
 
 
@@ -470,4 +507,17 @@ fn test_food_table_search_and() {
     let keys: Vec<_> =  food_table.food_list.iter().map(|(key, food)| key).collect();
     assert!(keys.contains(&&"18016".to_string()));
     assert!(keys.contains(&&"18022".to_string()));
+}
+
+#[test]
+fn test_food_table_percentage_of_kijun() {
+    let food_table = FoodTable::new();
+    let kijun = Kijun::new(20, 50.0, 160.0, Gender::Male, PAL::Low);
+    assert_eq!(food_table.percentage_of_kijun(&kijun), None);
+
+    let food_table = FoodTable::from_json("./test/test_foods.json").unwrap();
+    let food_table = food_table.search("アマランサス");
+    assert_eq!(food_table.food_list.len(), 1);
+    assert_eq!(&food_table.get("01001").unwrap().name, &FoodData::String("アマランサス　玄穀".to_string()));
+    //assert_eq!(food_table.percentage_of_kijun(&kijun), Some(0.0));
 }
