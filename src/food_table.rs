@@ -516,8 +516,43 @@ fn test_food_table_percentage_of_kijun() {
     assert_eq!(food_table.percentage_of_kijun(&kijun), None);
 
     let food_table = FoodTable::from_json("./test/test_foods.json").unwrap();
-    let food_table = food_table.search("アマランサス");
-    assert_eq!(food_table.food_list.len(), 1);
-    assert_eq!(&food_table.get("01001").unwrap().name, &FoodData::String("アマランサス　玄穀".to_string()));
-    //assert_eq!(food_table.percentage_of_kijun(&kijun), Some(0.0));
+    assert!(food_table.percentage_of_kijun(&kijun).is_some());
+
+    // 摂取基準を完全に満たす食材を作成して、割合が100になればよい
+    let mut food_table = FoodTable::new();
+    let mut food = Food::new();
+    food.set("エネルギー", FoodData::Number(1952.7593));
+    food.set("たんぱく質", FoodData::Number(60.0));
+    food.set("脂質", FoodData::Number(44.0));
+    food.set("多価不飽和脂肪酸", FoodData::Number(13.0));
+    food.set("炭水化物", FoodData::Number(245.0));
+    food.set("食物繊維総量", FoodData::Number(20.0));
+    food.set("レチノール活性当量", FoodData::Number(850.0));
+    food.set("ビタミンD", FoodData::Number(5.5));
+    food.set("α-トコフェロール", FoodData::Number(6.5));
+    food.set("ビタミンK", FoodData::Number(150.0));
+    food.set("ビタミンB1", FoodData::Number(1.4));
+    food.set("ビタミンB2", FoodData::Number(1.6));
+    food.set("ナイアシン", FoodData::Number(15.0));
+    food.set("ビタミンB6", FoodData::Number(1.4));
+    food.set("ビタミンB12", FoodData::Number(2.4));
+    food.set("葉酸", FoodData::Number(240.0));
+    food.set("パントテン酸", FoodData::Number(5.0));
+    food.set("ビオチン", FoodData::Number(50.0));
+    food.set("ビタミンC", FoodData::Number(100.0));
+    food.set("ナトリウム", FoodData::Number(3148.0));
+    food.set("カリウム", FoodData::Number(2500.0));
+    food.set("カルシウム", FoodData::Number(800.0));
+    food.set("マグネシウム", FoodData::Number(340.0));
+    food.set("リン", FoodData::Number(1000.0));
+    food.set("鉄", FoodData::Number(7.0));
+    food.set("亜鉛", FoodData::Number(10.0));
+    food.set("銅", FoodData::Number(0.9));
+    food.set("マンガン", FoodData::Number(4.0));
+    food.set("ヨウ素", FoodData::Number(130.0));
+    food.set("セレン", FoodData::Number(30.0));
+    food.set("クロム", FoodData::Number(10.0));
+    food.set("モリブデン", FoodData::Number(25.0));
+    food_table.add(food);
+    assert_eq!(food_table.percentage_of_kijun(&kijun), Some(100.0));
 }
