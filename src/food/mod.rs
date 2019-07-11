@@ -394,6 +394,80 @@ impl Food {
 
         Some(food)
     }
+
+    fn add(&self, food: &Food) -> Food {
+        Food {
+            group: FoodData::None,
+            number: FoodData::None,
+            index: FoodData::None,
+            name: FoodData::None,
+            weight: self.weight.add(&food.weight),
+            refuse: self.refuse.add(&food.refuse),
+            enerc_kcal: self.enerc_kcal.add(&food.enerc_kcal),
+            enerc: self.enerc.add(&food.enerc),
+            water: self.water.add(&food.water),
+            protein: self.protein.add(&food.protein),
+            protcaa: self.protcaa.add(&food.protcaa),
+            lipid: self.lipid.add(&food.lipid),
+            fatnlea: self.fatnlea.add(&food.fatnlea),
+            fasat: self.fasat.add(&food.fasat),
+            fams: self.fams.add(&food.fams),
+            fapu: self.fapu.add(&food.fapu),
+            chole: self.chole.add(&food.chole),
+            carbohydrate: self.carbohydrate.add(&food.carbohydrate),
+            choavlm: self.choavlm.add(&food.choavlm),
+            fibsol: self.fibsol.add(&food.fibsol),
+            fibins: self.fibins.add(&food.fibins),
+            fibtg: self.fibtg.add(&food.fibtg),
+            ash: self.ash.add(&food.ash),
+            na: self.na.add(&food.na),
+            k: self.k.add(&food.k),
+            ca: self.ca.add(&food.ca),
+            mg: self.mg.add(&food.mg),
+            p: self.p.add(&food.p),
+            fe: self.fe.add(&food.fe),
+            zn: self.zn.add(&food.zn),
+            cu: self.cu.add(&food.cu),
+            mn: self.mn.add(&food.mn),
+            id: self.id.add(&food.id),
+            se: self.se.add(&food.se),
+            cr: self.cr.add(&food.cr),
+            mo: self.mo.add(&food.mo),
+            retol: self.retol.add(&food.retol),
+            carta: self.carta.add(&food.carta),
+            cartb: self.cartb.add(&food.cartb),
+            crypxb: self.crypxb.add(&food.crypxb),
+            cartbeq: self.cartbeq.add(&food.cartbeq),
+            vita_rae: self.vita_rae.add(&food.vita_rae),
+            vitd: self.vitd.add(&food.vitd),
+            tocpha: self.tocpha.add(&food.tocpha),
+            tocphb: self.tocphb.add(&food.tocphb),
+            tocphg: self.tocphg.add(&food.tocphg),
+            tocphd: self.tocphd.add(&food.tocphd),
+            vitk: self.vitk.add(&food.vitk),
+            thiahcl: self.thiahcl.add(&food.thiahcl),
+            ribf: self.ribf.add(&food.ribf),
+            nia: self.nia.add(&food.nia),
+            vitb6a: self.vitb6a.add(&food.vitb6a),
+            vitb12: self.vitb12.add(&food.vitb12),
+            fol: self.fol.add(&food.fol),
+            pantac: self.pantac.add(&food.pantac),
+            biot: self.biot.add(&food.biot),
+            vitc: self.vitc.add(&food.vitc),
+            nacl_eq: self.nacl_eq.add(&food.nacl_eq),
+            alc: self.alc.add(&food.alc),
+            nitra: self.nitra.add(&food.nitra),
+            thebrn: self.thebrn.add(&food.thebrn),
+            caffn: self.caffn.add(&food.caffn),
+            tan: self.tan.add(&food.tan),
+            polyphent: self.polyphent.add(&food.polyphent),
+            aceac: self.aceac.add(&food.aceac),
+            cooking_oil: self.cooking_oil.add(&food.cooking_oil),
+            oa: self.oa.add(&food.oa),
+            yield_per: self.yield_per.add(&food.yield_per),
+            remark: FoodData::None
+        }
+    }
 }
 
 
@@ -448,4 +522,22 @@ fn test_food_change_weight() {
     food.set("重量",  FoodData::Number(50.0));
     let new_food = food.change_weight(27.0).unwrap();
     assert_eq!(new_food.get("重量").unwrap().to_string().as_str(), "27");
+}
+
+#[test]
+fn test_food_add() {
+    let mut left = Food::new();
+    let mut right = Food::new();
+
+    left.set("食品名", FoodData::String("食品".to_string()));
+    left.set("クロム", FoodData::Number(10.0));
+    right.set("食品名", FoodData::String("食品".to_string()));
+    right.set("クロム", FoodData::Number(20.0));
+    let result = left.add(&right);
+    assert_eq!(result.get("食品名"), Some(&FoodData::None));
+    assert_eq!(result.get("クロム"), Some(&FoodData::Number(30.0)));
+
+    left.set("モリブデン", FoodData::Number(50.0));
+    let result = left.add(&right);
+    assert_eq!(result.get("モリブデン"), Some(&FoodData::Number(50.0)));
 }
