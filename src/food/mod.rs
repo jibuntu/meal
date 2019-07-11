@@ -395,7 +395,7 @@ impl Food {
         Some(food)
     }
 
-    fn add(&self, food: &Food) -> Food {
+    pub fn add(&self, food: &Food) -> Food {
         Food {
             group: FoodData::None,
             number: FoodData::None,
