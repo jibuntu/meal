@@ -1156,7 +1156,7 @@ impl Kijun {
     pub fn get_molybdenum(age: usize, gender: Gender) -> Result<KijunValue, String> {
         let result = match age {
             0 ... 17 => {
-                return Err("0歳以下はモリブデンの推奨量を求めることができません".to_string())
+                return Err("17歳以下はモリブデンの推奨量を求めることができません".to_string())
             },
             18 ... 29 => { gender_match!(gender, 25.0, 20.0) },
             30 ... 49 => { gender_match!(gender, 30.0, 25.0) },
