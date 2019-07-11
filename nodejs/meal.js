@@ -43,8 +43,8 @@ function Json() {
       return this
     }
 
-    this.spawn = (path) => {
-      let result = spawn(path, ["a", this.path])
+    this.spawn = () => {
+      let result = spawn("meal", ["a", this.path])
       console.log(result.stdout.toString())
       return this
     }
