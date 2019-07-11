@@ -153,29 +153,14 @@ impl FoodTable {
         food_table
     }
 
-    pub fn get_sum(&self, keys: &[&str]) -> Vec<FoodData> {
-        let mut sum = vec![0_f32; keys.len()];
+    pub fn get_sum(&self) -> Food {
+        let mut sum = Food::new();
 
-        for (index, key) in keys.iter().enumerate() {
-            for (_num, food) in &self.food_list {
-                let food_data = match food.get(key) {
-                    Some(food_data) => food_data,
-                    None => continue
-                };
-
-                match food_data {
-                    FoodData::Number(data) => {
-                        sum[index] += *data;
-                    },
-                    FoodData::EstimatedNumber(data) => {
-                        sum[index] += *data;
-                    },
-                    FoodData::String(_) | FoodData::None => ()
-                }
-            }
+        for (_num, food) in &self.food_list {
+            sum = sum.add(&food);
         }
 
-        sum.iter().map(|data| FoodData::Number(*data)).collect()
+        sum
     }
 
     pub fn set_weight(&mut self, weight: f32) {
@@ -281,20 +266,18 @@ impl FoodTable {
     pub fn add_sum_to_table(&self, table: &mut Table, name_list: &[&str]) {
         // 合計を追加する
         let mut row = Vec::new();
-        let sum = self.get_sum(name_list);
+        let sum_food = self.get_sum();
+        let sum = sum_food.get_list(name_list);
         for (name, food_data) in name_list.iter().zip(sum.iter()) {
             if *name == "食品名" {
                 row.push(Cell::new(&color("合計", "y+")));
-            } else if *name == "食品番号" || *name == "食品群" {
-                let mut cell = Cell::new(&color("-", "y+"));
-                cell.align(prettytable::format::Alignment::RIGHT);
-                row.push(cell);
             } else {
+                let food_data = food_data.unwrap_or(&FoodData::None);
                 let mut cell = Cell::new(&color(&food_data.to_string(), "y+"));
+
                 cell.align(prettytable::format::Alignment::RIGHT);
                 row.push(cell);
             }
-
         }
 
         table.add_row(Row::new(row));
@@ -327,24 +310,18 @@ impl FoodTable {
                                          kijun: &Kijun) {
         // 摂取基準に対する割合を追加する
         let mut row = Vec::new();
-        let sum = self.get_sum(name_list);
+        let sum_food = self.get_sum();
+        let sum = sum_food.get_list(name_list);
         let kijun_values = kijun.get_list(name_list);
         let iter = name_list.iter().zip(kijun_values.iter()).zip(sum);
         for ((name, kijun_value), food_data) in iter {
             if *name == "食品名" {
                 row.push(Cell::new(&color("摂取基準に対する割合", "g+")));
             } else {
-                let mut data = match food_data {
-                    FoodData::Number(num) => match kijun_value {
+                let mut data = match food_data.unwrap_or(&FoodData::None).get_number() {
+                    Some(num) => match kijun_value {
                         Some(kijun_value) => {
-                            let per = kijun_value.get_percentage(num);
-                            format!("{:.0}%", per)
-                        },
-                        None => "-".to_string()
-                    },
-                    FoodData::EstimatedNumber(num) => match kijun_value {
-                        Some(kijun_value) => {
-                            let per = kijun_value.get_percentage(num);
+                            let per = kijun_value.get_percentage(*num);
                             format!("{:.0}%", per)
                         },
                         None => "-".to_string()
@@ -422,7 +399,7 @@ fn test_food_table_iter() {
     let food_table = FoodTable::from_json("./test/test_foods.json").unwrap();
     for (s, f) in food_table.iter() {
         for (s, f) in food_table.iter() {
-            food_table.get_sum(&["食品名"]);
+            food_table.get_sum();
         }
     }
 }
@@ -448,10 +425,10 @@ fn test_food_table_get_list() {
 fn test_food_table_get_sum() {
     let food_table = FoodTable::from_json("./test/test_foods.json").unwrap();
     let food_table = food_table.get_list(&["01001", "01002", "01003", "01004"]);
-    let sum = food_table.get_sum(&["たんぱく質"]);
-    assert_eq!(sum[0].to_string(), "42.7");
-    let sum = food_table.get_sum(&["食品名"]);
-    assert_eq!(sum[0].to_string(), "0");
+    let sum = food_table.get_sum();
+    assert_eq!(sum.get("たんぱく質").unwrap().to_string(), "42.7");
+    let sum = food_table.get_sum();
+    assert_eq!(sum.get("食品名").unwrap().to_string(), "-");
 }
 
 #[test]
