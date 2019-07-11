@@ -32,6 +32,10 @@ function Json() {
     }
 
     this.combination = (list) => {
+      if(Array.isArray(list) === false) {
+        this.data["combination"] = [list]
+        return this
+      }
       this.data["combination"] = list
       return this
     }
