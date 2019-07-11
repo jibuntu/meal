@@ -64,6 +64,14 @@ impl FoodData {
             _ => "-".to_string()
         }
     }
+
+    pub fn add(&self, food_data: &FoodData) -> FoodData {
+        let left = self.get_number().unwrap_or(&0.0);
+
+        let right = food_data.get_number().unwrap_or(&0.0);
+
+        FoodData::Number(*left + *right)
+    }
 }
 
 
@@ -125,4 +133,24 @@ fn test_food_data_to_string() {
 
     let food_data = FoodData::from_str("(Tr)");
     assert_eq!(&food_data.to_string(), "(Tr)");
+}
+
+#[test]
+fn test_food_data_add() {
+    let left = FoodData::Number(20.0);
+    let right = FoodData::Number(20.0);
+    assert_eq!(left.add(&right), FoodData::Number(40.0));
+
+
+    let left = FoodData::Number(20.0);
+    let right = FoodData::EstimatedNumber(20.0);
+    assert_eq!(left.add(&right), FoodData::Number(40.0));
+
+    let left = FoodData::Number(20.0);
+    let right = FoodData::String(String::new());
+    assert_eq!(left.add(&right), FoodData::Number(20.0));
+
+    let left = FoodData::None;
+    let right = FoodData::String(String::new());
+    assert_eq!(left.add(&right), FoodData::Number(0.0));
 }
