@@ -20,6 +20,6 @@ json
   .body(body)
   .foods(foods)
   .name_list("摂取基準")
+  .comb([3, 4, 5])
   .path("./test.json")
   .write()
-  

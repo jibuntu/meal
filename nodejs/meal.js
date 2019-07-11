@@ -31,6 +31,15 @@ function Json() {
       return this
     }
 
+    this.combination = (list) => {
+      this.data["combination"] = list
+      return this
+    }
+
+    this.comb = (list) => {
+      return this.combination(list)
+    }
+
     this.path = (path) => {
       this.path = path
       return this
