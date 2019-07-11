@@ -21,7 +21,7 @@ macro_rules! gender_match {
     };
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub enum KijunValue {
     Suisyo(f32), // 値になるべく近い方が望ましい
     Measu(f32), // 値になるべく近い方が望ましいが、あくまで目安である
