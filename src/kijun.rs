@@ -412,8 +412,8 @@ impl Kijun {
             return Err("0歳以下は脂質の目標量を求めることができません".to_string())
         }
 
-        let result_min = (energy * 0.20 / 9.0);
-        let result_max = (energy * 0.30 / 9.0);
+        let result_min = (energy * 0.20);
+        let result_max = (energy * 0.30);
 
         Ok(KijunValue::Range((result_min, result_max)))
     }
@@ -424,7 +424,7 @@ impl Kijun {
             return Err("17歳以下は飽和脂肪酸の目標量を求めることができません".to_string())
         }
 
-        Ok(KijunValue::Less((energy * 0.07 / 9.0)))
+        Ok(KijunValue::Less((energy * 0.07)))
     }
 
     // n-6系脂肪酸
