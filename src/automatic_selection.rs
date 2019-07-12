@@ -60,21 +60,21 @@ pub fn automatic_selection(matches: &ArgMatches) -> Result<(), String> {
         Err(e) => return Err(e)
     };
 
-    let path = "/home/jibuntu/programming_language/rust/project/meal/data/foods.json";
-    let mut foods = match FoodTable::from_json(path) {
-        Ok(foods) => foods,
+    let food_table_path = "/home/jibuntu/programming_language/rust/project/meal/data/foods.json";
+    let food_table = match FoodTable::from_json(food_table_path) {
+        Ok(food_table) => food_table,
         Err(e) => return Err(e.to_string())
     };
 
-    let mut food_table = FoodTable::new();
+    let mut inputted_food_table = FoodTable::new();
     for parsed_food in parsed_data.foods {
-        let mut food = match foods.get(&parsed_food.number) {
+        let mut food = match food_table.get(&parsed_food.number) {
             Some(food) => food.clone(),
             None => return Err(format!("{}番の食材はありません。JSONの値が間違っています", &parsed_food.number))
         };
 
         food = food.change_weight(parsed_food.weight.unwrap_or(100.0)).unwrap();
-        food_table.add(food);
+        inputted_food_table.add(food);
     }
 
     let list: Vec<_> = parsed_data.name_list.iter().map(|name| name.as_str()).collect();
@@ -85,20 +85,22 @@ pub fn automatic_selection(matches: &ArgMatches) -> Result<(), String> {
                            parsed_data.body.gender,
                            parsed_data.body.pal);
 
-    let keys: Vec<_> = food_table.iter().map(|(key, food)| key.to_string()).collect();
-
     let mut food_table_list: Vec<(f32, FoodTable)> = Vec::new();
-    let comb = Combination::new(keys, 5);
+    let list_of_length_of_combination = parsed_data.comb.unwrap_or(vec![5]);
 
-    for key_list in comb.iter() {
-        let keys: Vec<&str> = key_list.iter().map(|key| key.as_str()).collect();
-        let ft = food_table.get_list(&keys);
-        let percentage = ft.percentage_of_kijun(&kijun).unwrap();
-        food_table_list.push((percentage, ft));
+    for length_of_combination in list_of_length_of_combination {
+        let keys: Vec<_> = inputted_food_table.iter().map(|(key, food)| key.to_string()).collect();
+        let comb = Combination::new(keys, length_of_combination);
+
+        for key_list in comb.iter() {
+            let keys: Vec<&str> = key_list.iter().map(|key| key.as_str()).collect();
+            let ft = inputted_food_table.get_list(&keys);
+            let percentage = ft.percentage_of_kijun(&kijun).unwrap();
+            food_table_list.push((percentage, ft));
+        }
     }
 
     food_table_list.sort_by(|(p, f), (p2, f2)| p2.partial_cmp(&p).unwrap());
-
 
     for (index, (percentage, ft)) in food_table_list.iter().take(5).enumerate() {
         println!("{}", color(&format!("[{}] 摂取基準の達成率: {}", index+1, percentage), "g+"));
