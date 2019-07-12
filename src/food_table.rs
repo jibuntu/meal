@@ -7,7 +7,7 @@ use prettytable::{Table, Row, Cell, Attr};
 
 use crate::food::Food;
 use crate::food::food_data::FoodData;
-use crate::kijun::{Kijun, Gender, PAL};
+use crate::kijun::{Kijun, Gender, PAL, KijunValue};
 use std::collections::HashMap;
 
 
@@ -24,8 +24,8 @@ const KEY_LIST: [&str;68] = ["食品群", "食品番号", "索引番号", "食�
 "ビタミンC", "食塩相当量", "アルコール", "硝酸イオン", "テオブロミン", "カフェイン",
 "タンニン", "ポリフェノール", "酢酸", "調理油", "有機酸", "重量変化率", "備考"];
 
-const KIJUN_KEY_LIST: [&str;32] = [
-    "エネルギー", "たんぱく質", "脂質",
+const KIJUN_KEY_LIST: [&str;33] = [
+    "エネルギー", "たんぱく質", "脂質", "飽和脂肪酸",
     "多価不飽和脂肪酸", "炭水化物", "食物繊維総量", "レチノール活性当量",
     "ビタミンD", "α-トコフェロール", "ビタミンK", "ビタミンB1", "ビタミンB2",
     "ナイアシン", "ビタミンB6", "ビタミンB12", "葉酸", "パントテン酸", "ビオチン",
@@ -386,9 +386,28 @@ impl FoodTable {
             let num = sum_value.get_number().unwrap();
 
             let mut percentage = kijun_data.get_percentage(*num);
-            if 100.0 < percentage {
-                percentage = 100.0;
-            }
+
+            percentage = match kijun_data {
+                // 範囲、以下が100%を超えた場合はマイナスにする
+                KijunValue::Range(_) |
+                KijunValue::Less(_) => {
+                    if 100.0 < percentage {
+                        100.0 - percentage
+                    } else {
+                        percentage
+                    }
+                },
+                // 基準値の推奨値と以上と目安は100%を超えても無視する
+                // そもそも基準値の以上は100%を超えることがない
+                KijunValue::Suisyo(_) | KijunValue::Measu(_) |
+                KijunValue::More(_) => {
+                    if 100.0 < percentage {
+                        100.0
+                    } else {
+                        percentage
+                    }
+                },
+            };
 
             sum_percentage += percentage;
         }
@@ -518,12 +537,17 @@ fn test_food_table_percentage_of_kijun() {
     let food_table = FoodTable::from_json("./test/test_foods.json").unwrap();
     assert!(food_table.percentage_of_kijun(&kijun).is_some());
 
+    //for key in KIJUN_KEY_LIST.iter() {
+    //    println!("key {}, {:?}", key, kijun.get(key));
+    //}
+
     // 摂取基準を完全に満たす食材を作成して、割合が100になればよい
     let mut food_table = FoodTable::new();
     let mut food = Food::new();
     food.set("エネルギー", FoodData::Number(1952.7593));
     food.set("たんぱく質", FoodData::Number(60.0));
-    food.set("脂質", FoodData::Number(44.0));
+    food.set("脂質", FoodData::Number(391.0));
+    food.set("飽和脂肪酸", FoodData::Number(136.0));
     food.set("多価不飽和脂肪酸", FoodData::Number(13.0));
     food.set("炭水化物", FoodData::Number(245.0));
     food.set("食物繊維総量", FoodData::Number(20.0));
@@ -553,6 +577,12 @@ fn test_food_table_percentage_of_kijun() {
     food.set("セレン", FoodData::Number(30.0));
     food.set("クロム", FoodData::Number(10.0));
     food.set("モリブデン", FoodData::Number(25.0));
-    food_table.add(food);
+    food_table.add(food.clone());
     assert_eq!(food_table.percentage_of_kijun(&kijun), Some(100.0));
+
+    let mut food_table = FoodTable::new();
+    food.set("ナトリウム", FoodData::Number(4000.0));
+    food_table.add(food.clone());
+    // ナトリウムが過剰で他の栄養が完全な場合、割合が100以下になるはず
+    assert!(food_table.percentage_of_kijun(&kijun).unwrap() < 100.0);
 }
