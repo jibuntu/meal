@@ -56,8 +56,14 @@ function Json() {
       return this
     }
 
-    this.spawn = () => {
+    this.automaticSelection = () => {
       let result = spawn("meal", ["a", this.path])
+      console.log(result.stdout.toString())
+      return this
+    }
+
+    this.calc = () => {
+      let result = spawn("meal", ["c", this.path])
       console.log(result.stdout.toString())
       return this
     }

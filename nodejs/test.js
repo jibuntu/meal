@@ -23,3 +23,4 @@ json
   .comb([3, 4, 5])
   .path("./test.json")
   .write()
+  .calc()
