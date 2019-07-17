@@ -11,6 +11,15 @@ use crate::kijun::{Kijun, Gender, PAL, KijunValue};
 use std::collections::HashMap;
 
 
+macro_rules! value_or_error {
+    ($option:expr, $error:expr) => {
+        match $option {
+            Some(value) => value,
+            None => return Err($error .to_string())
+        }
+    };
+}
+
 const KEY_LIST: [&str;68] = ["食品群", "食品番号", "索引番号", "食品名", "廃棄率", "エネルギー",
 "エネルギー（kJ)", "水分", "たんぱく質", "アミノ酸組成によるたんぱく質", "脂質",
 "トリアシルグリセロール当量", "飽和脂肪酸", "一価不飽和脂肪酸", "多価不飽和脂肪酸",
@@ -94,44 +103,30 @@ impl FoodTable {
             Err(e) => return Err(e.to_string())
         };
 
-        let obj = match data {
-            Value::Object(obj) => obj,
-            _ => return Err("Cannot load json".to_string())
-        };
+        let obj = value_or_error!(data.as_object(), "jsonの値はオブジェクにしてください");
+        let foods = value_or_error!(obj.get("foods"), "jsonのオブジェクトにfoods属性がありません");
+        let food_list = value_or_error!(foods.as_array(), "foods属性の値は配列にしてください");
 
-        for (_key, value) in obj {
-            let arr = match value {
-                Value::Array(arr) => arr,
-                _ => return Err("Cannot load json".to_string())
-            };
 
-            if arr.len() != KEY_LIST.len() {
-                return Err("Cannot load json".to_string())
-            }
-
+        for food_data in food_list {
+            let value_list = value_or_error!(food_data.as_array(), "foods属性の配列の値は配列にしてください");
             let mut food = Food::new();
 
             // stringの部分をセット
-            for i in 0..4 {
-                let data = match &arr[i] {
-                    Value::String(data) => data,
-                    _ => return Err("Cannot load json".to_string())
-                };
-                food.set(KEY_LIST[i], FoodData::String(data.to_string()))
+            for (value, key) in value_list[0..4].iter().zip(KEY_LIST[0..4].iter()) {
+                let data = value_or_error!(value.as_str(), "foods属性の値が読み込めません");
+                food.set(key, FoodData::String(data.to_string()));
             }
 
             // それ以降をセット
-            for i in 4..KEY_LIST.len() {
-                let data = match &arr[i] {
-                    Value::String(data) => data,
-                    _ => return Err("Cannot load json".to_string())
-                };
-                food.set(KEY_LIST[i], FoodData::from_str(data))
+            let len = KEY_LIST.len();
+            for (value, key) in value_list[4..len].iter().zip(KEY_LIST[4..len].iter()) {
+                let data = value_or_error!(value.as_str(), "foods属性の値が読み込めません");
+                food.set(key, FoodData::from_str(data));
             }
 
-
             food.set("重量", FoodData::Number(100.0));
-            food_table.add(food)
+            food_table.add(food);
         }
 
         Ok(food_table)
