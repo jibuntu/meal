@@ -118,6 +118,10 @@ function Foods() {
     return this
   }
 
+  this.f = (food_number) => {
+    return this.food(food_number)
+  }
+
   // data_listの末尾にある要素のweightを設定する
   // すでに要素にweightが設定されている場合は、新しい要素を引数のweightでもう一つ作成する
   this.weight = (weight) => {
