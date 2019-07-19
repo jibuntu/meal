@@ -360,7 +360,8 @@ impl FoodTable {
         self.add_sum_to_table(&mut table, name_list);
         self.add_kijun_to_table(&mut table, name_list, &kijun);
         self.add_kijun_percentage_to_table(&mut table, name_list, &kijun);
-
+        let percentage = self.percentage_of_kijun(&kijun).unwrap_or(-1.0);
+        println!("{}", color(&format!("摂取基準の達成率: {:.2}%", percentage), "g+"));
         table.printstd();
     }
 
