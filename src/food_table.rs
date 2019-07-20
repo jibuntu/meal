@@ -542,8 +542,8 @@ fn test_food_table_percentage_of_kijun() {
     let mut food = Food::new();
     food.set("エネルギー", FoodData::Number(1952.7593));
     food.set("たんぱく質", FoodData::Number(60.0));
-    food.set("脂質", FoodData::Number(391.0));
-    food.set("飽和脂肪酸", FoodData::Number(136.0));
+    food.set("脂質", FoodData::Number(44.0));
+    food.set("飽和脂肪酸", FoodData::Number(14.0));
     food.set("多価不飽和脂肪酸", FoodData::Number(13.0));
     food.set("炭水化物", FoodData::Number(245.0));
     food.set("食物繊維総量", FoodData::Number(20.0));
