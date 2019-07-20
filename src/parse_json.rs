@@ -22,7 +22,8 @@ pub struct ParsedData {
 
 pub struct ParsedFood {
     pub number: String,
-    pub weight: Option<f32>
+    pub weight: Option<f32>,
+    pub price: Option<f32>
 }
 
 pub struct Body {
@@ -67,9 +68,18 @@ pub fn parse_foods(data: &Value) -> Result<Vec<ParsedFood>, String> {
                     None => None
                 };
 
+                let price = match obj.get("price") {
+                    Some(price) => {
+                        let price = value_or_error!(price.as_f64(), "priceの値をf64に変換できません");
+                        Some(price as f32)
+                    },
+                    _ => None
+                };
+
                 ParsedFood {
                     number,
-                    weight
+                    weight,
+                    price
                 }
             },
             _ => return Err("foodsの値はオブジェクトの配列にしてください".to_string())

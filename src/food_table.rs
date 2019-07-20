@@ -125,6 +125,7 @@ impl FoodTable {
                 food.set(key, FoodData::from_str(data));
             }
 
+            food.set("価格", FoodData::String("-".to_string()));
             food.set("重量", FoodData::Number(100.0));
             food_table.add(food);
         }

@@ -134,6 +134,10 @@ fn calc(matches: &ArgMatches) -> Result<(), String>{
             None => return Err(format!("{}番の食材はありません。JSONの値が間違っています", &parsed_food.number))
         };
 
+        if let Some(price) = parsed_food.price {
+            food.set("価格", FoodData::Number(price));
+        }
+
         food_table.add(food);
     }
 

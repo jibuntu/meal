@@ -9,6 +9,7 @@ pub struct Food {
     pub number: FoodData,       // 食品番号
     pub index: FoodData,        // 索引番号
     pub name: FoodData,         // 食品名
+    pub price: FoodData,        // 価格
     pub weight: FoodData,       // 重量
     pub refuse: FoodData,       // 廃棄率
     pub enerc_kcal: FoodData,   // エネルギー（kcal）
@@ -83,6 +84,7 @@ impl Food {
             number: FoodData::None,       // 食品番号
             index: FoodData::None,        // 索引番号
             name: FoodData::None,         // 食品名
+            price: FoodData::None,        // 価格
             weight: FoodData::None,       // 重量
             refuse: FoodData::None,       // 廃棄率
             enerc_kcal: FoodData::None,   // エネルギー（kcal）
@@ -157,6 +159,7 @@ impl Food {
             "食品番号" => &mut self.number,
             "索引番号" => &mut self.index,
             "食品名" => &mut self.name,
+            "価格" => &mut self.price,
             "重量" => &mut self.weight,
             "廃棄率" => &mut self.refuse,
             "エネルギー（kcal）" | "エネルギー" => &mut self.enerc_kcal,
@@ -234,6 +237,7 @@ impl Food {
             "食品番号" => &self.number,
             "索引番号" => &self.index,
             "食品名" => &self.name,
+            "価格" => &self.price,
             "重量" => &self.weight,
             "廃棄率" => &self.refuse,
             "エネルギー（kcal）" | "エネルギー" => &self.enerc_kcal,
@@ -325,6 +329,7 @@ impl Food {
             number: self.number.clone(),                // 食品番号
             index: self.index.clone(),                  // 索引番号
             name: self.name.clone(),                    // 食品名
+            price: self.price.clone(),                    // 価格
             weight: self.weight.rate(rate),             // 重量
             refuse: self.refuse.rate(rate),             // 廃棄率
             enerc_kcal: self.enerc_kcal.rate(rate),     // エネルギー（kcal）
@@ -401,6 +406,7 @@ impl Food {
             number: FoodData::None,
             index: FoodData::None,
             name: FoodData::None,
+            price: self.price.add(&food.price),
             weight: self.weight.add(&food.weight),
             refuse: self.refuse.add(&food.refuse),
             enerc_kcal: self.enerc_kcal.add(&food.enerc_kcal),

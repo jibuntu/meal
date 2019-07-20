@@ -18,7 +18,7 @@ function Json() {
     this.name_list = (type) => {
       if(type == "摂取基準") {
         this.data["name_list"] = [
-          "食品番号", "食品名", "廃棄率", "重量", "エネルギー", "たんぱく質",
+          "食品番号", "食品名", "価格", "廃棄率", "重量", "エネルギー", "たんぱく質",
           "脂質", "飽和脂肪酸", "多価不飽和脂肪酸", "炭水化物", "食物繊維総量", 
           "レチノール活性当量", "ビタミンD", "α-トコフェロール", 
           "ビタミンK", "ビタミンB1", "ビタミンB2", "ナイアシン", 
@@ -147,6 +147,16 @@ function Foods() {
   this.w = (num) => {
     this.weight(num)
     return this
+  }
+
+  // data_listの末尾にある要素のpriceを設定する
+  this.price = (price) => {
+    this.data_list[this.data_list.length - 1]["price"] = price
+    return this
+  }
+
+  this.p = (price) => {
+    return this.price(price)
   }
 }
 
