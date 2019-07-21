@@ -93,6 +93,14 @@ fn search(matches: &ArgMatches) -> Result<(), String> {
         }
     }
 
+    if let Some(name) = matches.value_of("ascending-order") {
+        foods.sort_ascending_order(name);
+    }
+
+    if let Some(name) = matches.value_of("descending-order") {
+        foods.sort_descending_order(name);
+    }
+
     let result = match search_type {
         SearchType::Or => foods.search_or(&text_list),
         SearchType::And => foods.search_and(&text_list),
@@ -190,6 +198,16 @@ fn main() {
                 .takes_value(true)
                 .min_values(1)
                 .help(r#"表示する列を指定します。食品番号と食品名はデフォルトです。"#))
+            .arg(Arg::with_name("ascending-order")
+                .long("12")
+                .takes_value(true)
+                .max_values(1)
+                .help("結果を昇順ソートします。値は列名です。"))
+            .arg(Arg::with_name("descending-order")
+                .long("21")
+                .takes_value(true)
+                .max_values(1)
+                .help("結果を降順ソートします。値は列名です。"))
             .arg(Arg::with_name("column-type")
                 .long("type")
                 .short("t")
