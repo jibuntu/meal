@@ -231,6 +231,24 @@ impl FoodTable {
         food_table
     }
 
+    pub fn sort_ascending_order(&mut self, name: &str) {
+        self.food_list.sort_by(|(_, food_a), (_, food_b)| {
+            let a = food_a.get(name).unwrap_or(&FoodData::None).get_number().unwrap_or(&0.0);
+            let b = food_b.get(name).unwrap_or(&FoodData::None).get_number().unwrap_or(&0.0);
+
+            a.partial_cmp(b).unwrap()
+        })
+    }
+
+    pub fn sort_descending_order(&mut self, name: &str) {
+        self.food_list.sort_by(|(_, food_a), (_, food_b)| {
+            let a = food_a.get(name).unwrap_or(&FoodData::None).get_number().unwrap_or(&0.0);
+            let b = food_b.get(name).unwrap_or(&FoodData::None).get_number().unwrap_or(&0.0);
+
+            b.partial_cmp(a).unwrap()
+        })
+    }
+
     pub fn get_table(&self, name_list: &[&str]) -> Table {
         let mut table = Table::new();
         table.set_format(*prettytable::format::consts::FORMAT_NO_LINESEP_WITH_TITLE);
@@ -523,6 +541,44 @@ fn test_food_table_search_and() {
     let keys: Vec<_> =  food_table.food_list.iter().map(|(key, food)| key).collect();
     assert!(keys.contains(&&"18016".to_string()));
     assert!(keys.contains(&&"18022".to_string()));
+}
+
+#[test]
+fn test_food_table_ascending_order() {
+    let mut food_table = FoodTable::from_json("./test/test_foods.json").unwrap();
+    let mut iter = food_table.iter();
+    assert_eq!(iter.next().unwrap().1.get("食品番号").unwrap(), &FoodData::String("01001".to_string()));
+
+    food_table.sort_ascending_order("エネルギー");
+    let mut iter = food_table.iter();
+    assert_eq!(iter.next().unwrap().1.get("食品番号").unwrap(), &FoodData::String("18016".to_string()));
+    assert_eq!(iter.next().unwrap().1.get("食品番号").unwrap(), &FoodData::String("01003".to_string()));
+    assert_eq!(iter.next().unwrap().1.get("食品番号").unwrap(), &FoodData::String("18015".to_string()));
+
+    food_table.sort_ascending_order("食品名");
+    let mut iter = food_table.iter();
+    assert_eq!(iter.next().unwrap().1.get("食品番号").unwrap(), &FoodData::String("18016".to_string()));
+    assert_eq!(iter.next().unwrap().1.get("食品番号").unwrap(), &FoodData::String("01003".to_string()));
+    assert_eq!(iter.next().unwrap().1.get("食品番号").unwrap(), &FoodData::String("18015".to_string()));
+}
+
+#[test]
+fn test_food_table_descending_order() {
+    let mut food_table = FoodTable::from_json("./test/test_foods.json").unwrap();
+    let mut iter = food_table.iter();
+    assert_eq!(iter.next().unwrap().1.get("食品番号").unwrap(), &FoodData::String("01001".to_string()));
+
+    food_table.sort_descending_order("エネルギー");
+    let mut iter = food_table.iter();
+    assert_eq!(iter.next().unwrap().1.get("食品番号").unwrap(), &FoodData::String("01004".to_string()));
+    assert_eq!(iter.next().unwrap().1.get("食品番号").unwrap(), &FoodData::String("01002".to_string()));
+    assert_eq!(iter.next().unwrap().1.get("食品番号").unwrap(), &FoodData::String("01001".to_string()));
+
+    food_table.sort_ascending_order("食品名");
+    let mut iter = food_table.iter();
+    assert_eq!(iter.next().unwrap().1.get("食品番号").unwrap(), &FoodData::String("01004".to_string()));
+    assert_eq!(iter.next().unwrap().1.get("食品番号").unwrap(), &FoodData::String("01002".to_string()));
+    assert_eq!(iter.next().unwrap().1.get("食品番号").unwrap(), &FoodData::String("01001".to_string()));
 }
 
 #[test]
