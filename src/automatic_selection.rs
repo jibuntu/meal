@@ -83,7 +83,8 @@ pub fn automatic_selection(matches: &ArgMatches) -> Result<(), String> {
                            parsed_data.body.weight,
                            parsed_data.body.height,
                            parsed_data.body.gender,
-                           parsed_data.body.pal);
+                           parsed_data.body.pal,
+                           parsed_data.body.days.unwrap_or(1));
 
     let mut food_table_list: Vec<(f32, FoodTable)> = Vec::new();
     let list_of_length_of_combination = parsed_data.comb.unwrap_or(vec![5]);

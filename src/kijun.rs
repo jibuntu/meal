@@ -160,11 +160,12 @@ pub enum Gender {
 }
 
 pub struct Kijun {
-    age: usize,
-    weight: f32,
-    height: f32,
-    gender: Gender,
-    pal: PAL,
+    pub age: usize,
+    pub weight: f32,
+    pub height: f32,
+    pub gender: Gender,
+    pub pal: PAL,
+    pub days: usize,
     data_list: HashMap<String, KijunValue>
 }
 
@@ -173,7 +174,8 @@ impl Kijun {
            weight: f32,
            height: f32,
            gender: Gender,
-           pal: PAL) -> Kijun {
+           pal: PAL,
+           days: usize) -> Kijun {
         let mut data_list: HashMap<String, KijunValue> = HashMap::new();
 
         if let Ok(energy_val) = Kijun::get_energy(weight, height, age, gender, pal) {
@@ -325,12 +327,18 @@ impl Kijun {
             data_list.insert("モリブデン".to_string(), molybdenum);
         }
 
+        // 日数を反映
+        for (_, kijun_value) in &mut data_list {
+            kijun_value.change_days(days);
+        }
+
         Kijun {
             age,
             weight,
             height,
             gender,
             pal,
+            days,
             data_list
         }
     }

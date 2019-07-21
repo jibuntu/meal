@@ -10,6 +10,7 @@ body
   .height(160)
   .gender("male")
   .pal(1)
+  .days(2)
 
 foods
   .food("01001").w(200)

@@ -106,6 +106,11 @@ function Body() {
     }
     return this
   }
+
+  this.days = (days) => {
+    this.data["days"] = days
+    return this
+  }
 }
 
 function Foods() {

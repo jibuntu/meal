@@ -31,7 +31,8 @@ pub struct Body {
     pub weight: f32,
     pub height: f32,
     pub gender: Gender,
-    pub pal: PAL
+    pub pal: PAL,
+    pub days: Option<usize>
 }
 
 pub fn parse_foods(data: &Value) -> Result<Vec<ParsedFood>, String> {
@@ -178,13 +179,19 @@ pub fn parse_body(data: &Value) -> Result<Body, String> {
         None => return Err("bodyにpal属性がありません".to_string())
     };
 
+    let days = match obj.get("days") {
+        Some(value) => Some(value_or_error!(value.as_u64(), "daysの値をu64に変換できません") as usize),
+        None => None
+    };
+
 
     Ok(Body {
         age,
         weight,
         height,
         gender,
-        pal
+        pal,
+        days
     })
 }
 

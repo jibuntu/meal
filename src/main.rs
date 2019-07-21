@@ -155,7 +155,8 @@ fn calc(matches: &ArgMatches) -> Result<(), String>{
                            parsed_data.body.weight,
                            parsed_data.body.height,
                            parsed_data.body.gender,
-                           parsed_data.body.pal);
+                           parsed_data.body.pal,
+                           parsed_data.body.days.unwrap_or(1));
     food_table.print_with_sum_and_kijun(&list, &kijun);
 
     Ok(())

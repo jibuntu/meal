@@ -312,7 +312,7 @@ impl FoodTable {
         let kijun_values = kijun.get_list(name_list);
         for (name, value) in name_list.iter().zip(kijun_values.iter()) {
             if *name == "食品名" {
-                row.push(Cell::new(&color("摂取基準値", "c+")));
+                row.push(Cell::new(&color(&format!("摂取基準値（{}日分）", kijun.days), "c+")));
             } else {
                 let data = match value {
                     Some(v) => v.to_string(),
@@ -339,7 +339,7 @@ impl FoodTable {
         let iter = name_list.iter().zip(kijun_values.iter()).zip(sum);
         for ((name, kijun_value), food_data) in iter {
             if *name == "食品名" {
-                row.push(Cell::new(&color("摂取基準に対する割合", "g+")));
+                row.push(Cell::new(&color(&format!("摂取基準に対する割合（{}日分）", kijun.days), "g+")));
             } else {
                 let mut data = match food_data.unwrap_or(&FoodData::None).get_number() {
                     Some(num) => match kijun_value {
@@ -380,7 +380,7 @@ impl FoodTable {
         self.add_kijun_to_table(&mut table, name_list, &kijun);
         self.add_kijun_percentage_to_table(&mut table, name_list, &kijun);
         let percentage = self.percentage_of_kijun(&kijun).unwrap_or(-1.0);
-        println!("{}", color(&format!("摂取基準の達成率: {:.2}%", percentage), "g+"));
+        println!("{}", color(&format!("摂取基準の達成率（{}日分）: {:.2}%", kijun.days, percentage), "g+"));
         table.printstd();
     }
 
@@ -584,7 +584,7 @@ fn test_food_table_descending_order() {
 #[test]
 fn test_food_table_percentage_of_kijun() {
     let food_table = FoodTable::new();
-    let kijun = Kijun::new(20, 50.0, 160.0, Gender::Male, PAL::Low);
+    let kijun = Kijun::new(20, 50.0, 160.0, Gender::Male, PAL::Low, 1);
     assert_eq!(food_table.percentage_of_kijun(&kijun), None);
 
     let food_table = FoodTable::from_json("./test/test_foods.json").unwrap();
