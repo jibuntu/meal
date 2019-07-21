@@ -106,6 +106,24 @@ impl KijunValue {
     }
 }
 
+#[test]
+fn test_kijun_value_to_string() {
+    assert_eq!(&KijunValue::Suisyo(20.0).to_string(), "= 20");
+    assert_eq!(&KijunValue::Suisyo(20.5).to_string(), "= 20.5");
+    assert_eq!(&KijunValue::Suisyo(30.5).to_string(), "= 31");
+    assert_eq!(&KijunValue::Range((20.5, 30.5)).to_string(), "20.5 ~ 31");
+}
+
+#[test]
+fn test_kijun_value_get_percentage() {
+    assert_eq!(KijunValue::Suisyo(20.0).get_percentage(20.0), 100.0);
+    assert_eq!(KijunValue::Suisyo(20.0).get_percentage(40.0), 200.0);
+    assert_eq!(KijunValue::Suisyo(20.0).get_percentage(10.0), 50.0);
+    assert_eq!(KijunValue::Less(20.0).get_percentage(10.0), 100.0);
+    assert_eq!(KijunValue::More(20.0).get_percentage(40.0), 100.0);
+    assert_eq!(KijunValue::Range((20.0, 40.0)).get_percentage(30.0), 100.0);
+}
+
 
 #[derive(Copy, Clone)]
 pub enum PAL {
