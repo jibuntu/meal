@@ -104,6 +104,18 @@ impl KijunValue {
             },
         }
     }
+
+    pub fn change_days(&mut self, days: usize) {
+        match self {
+            KijunValue::Suisyo(kijun_value) => *kijun_value = *kijun_value * days as f32,
+            KijunValue::Measu(kijun_value) => *kijun_value = *kijun_value * days as f32,
+            KijunValue::Less(kijun_value) => *kijun_value = *kijun_value * days as f32,
+            KijunValue::More(kijun_value) => *kijun_value = *kijun_value * days as f32,
+            KijunValue::Range(kijun_value) => {
+                *kijun_value = (kijun_value.0 * days as f32, kijun_value.1 * days as f32)
+            },
+        }
+    }
 }
 
 #[test]
@@ -122,6 +134,15 @@ fn test_kijun_value_get_percentage() {
     assert_eq!(KijunValue::Less(20.0).get_percentage(10.0), 100.0);
     assert_eq!(KijunValue::More(20.0).get_percentage(40.0), 100.0);
     assert_eq!(KijunValue::Range((20.0, 40.0)).get_percentage(30.0), 100.0);
+}
+
+#[test]
+fn test_kijun_value_change_days() {
+    let mut kijun_value = KijunValue::Suisyo(20.0);
+    kijun_value.change_days(10);
+    assert_eq!(&kijun_value.to_string(), "= 200");
+    kijun_value.change_days(0);
+    assert_eq!(&kijun_value.to_string(), "= 0");
 }
 
 
