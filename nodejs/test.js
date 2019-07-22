@@ -19,11 +19,22 @@ foods
   .food("01004").w(20).p(30)
   .food("01004").w(50).p(100)
 
+// json
+//   .body(body)
+//   .foods(foods)
+//   .name_list("摂取基準")
+//   .comb([3, 4, 5])
+//   .path("./test.json")
+//   .write()
+//   .calc()
+
+foods = foods.changeWeight(0.5)
+
 json
   .body(body)
   .foods(foods)
   .name_list("摂取基準")
   .comb([3, 4, 5])
-  .path("./test.json")
+  .path("./test_2.json")
   .write()
   .calc()

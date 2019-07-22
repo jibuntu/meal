@@ -163,6 +163,21 @@ function Foods() {
   this.p = (price) => {
     return this.price(price)
   }
+
+  this.changeWeight = (rate) => {
+    let data_list = []
+    for(let data of this.data_list){
+      data_list.push({
+        "number": data.number,
+        "weight": data.weight * rate
+      })
+    }
+
+    let foods = new Foods()
+    foods.data_list = data_list
+    
+    return foods
+  }
 }
 
 module.exports = {
