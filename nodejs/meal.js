@@ -183,10 +183,18 @@ function Foods() {
   this.changeWeight = (rate) => {
     let data_list = []
     for(let data of this.data_list){
-      data_list.push({
-        "number": data.number,
-        "weight": data.weight * rate
-      })
+      let new_data = {
+        "number": data.number
+      }
+      
+      if(data["weight"] != undefined){
+        new_data["weight"] = data["weight"] * rate
+      }
+      if(data["price"] != undefined){
+        new_data["price"] = data["price"] * rate
+      }
+      
+      data_list.push(new_data)
     }
 
     let foods = new Foods()
