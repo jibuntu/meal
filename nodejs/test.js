@@ -16,7 +16,9 @@ let foods = new meal.Foods()
   .food("01002").w([10, 20, 30])
   .food("01003").w(200).w(300)
   .food("01004").w(20).p(30)
-  .food("01004").w(50).p(100)
+  .food("01004").w(50).ppg(1)
+  .food("01004").w(50).ppg(3)
+
 
 let json = new meal.Json()
   .body(body)

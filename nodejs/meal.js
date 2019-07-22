@@ -180,6 +180,20 @@ function Foods() {
     return this.price(price)
   }
 
+  this.price_per_gram = (price_per_gram) => {
+    let weight = this.data_list[this.data_list.length - 1]["weight"]
+    if(weight === undefined){
+      return this
+    }
+    
+    this.data_list[this.data_list.length - 1]["price"] = price_per_gram * weight
+    return this
+  }
+
+  this.ppg = (price_per_gram) => {
+    return this.price_per_gram(price_per_gram)
+  }
+
   this.changeWeight = (rate) => {
     let data_list = []
     for(let data of this.data_list){
