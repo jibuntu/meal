@@ -113,12 +113,7 @@ fn search(matches: &ArgMatches) -> Result<(), String> {
     Ok(())
 }
 
-fn calc(matches: &ArgMatches) -> Result<(), String>{
-    let path = match matches.value_of("file") {
-        Some(path) => path,
-        None => return Err("ファイルを指定してください".to_string())
-    };
-
+fn print_table(path: &str, foods: &FoodTable) -> Result<(), String> {
     let mut file = match File::open(path) {
         Ok(file) => file,
         Err(e) => return Err(e.to_string())
@@ -129,11 +124,6 @@ fn calc(matches: &ArgMatches) -> Result<(), String>{
         Err(e) => return Err(e)
     };
 
-    let path = "/home/jibuntu/programming_language/rust/project/meal/data/foods.json";
-    let mut foods = match FoodTable::from_json(path) {
-        Ok(foods) => foods,
-        Err(e) => return Err(e.to_string())
-    };
 
     let mut food_table = FoodTable::new();
     for parsed_food in parsed_data.foods {
@@ -158,6 +148,28 @@ fn calc(matches: &ArgMatches) -> Result<(), String>{
                            parsed_data.body.pal,
                            parsed_data.body.days.unwrap_or(1));
     food_table.print_with_sum_and_kijun(&list, &kijun);
+    println!();
+
+    Ok(())
+}
+
+fn calc(matches: &ArgMatches) -> Result<(), String>{
+    let path = match matches.value_of("file") {
+        Some(path) => path,
+        None => return Err("ファイルを指定してください".to_string())
+    };
+
+    let path = "/home/jibuntu/programming_language/rust/project/meal/data/foods.json";
+    let mut foods = match FoodTable::from_json(path) {
+        Ok(foods) => foods,
+        Err(e) => return Err(e.to_string())
+    };
+
+    for file_name in matches.values_of("file").unwrap() {
+        if let Err(e) = print_table(file_name, &foods) {
+            return Err(e);
+        }
+    }
 
     Ok(())
 }
@@ -221,7 +233,7 @@ fn main() {
             .setting(AppSettings::DeriveDisplayOrder)
             .about("JSONから読み出して計算します")
             .arg(Arg::with_name("file")
-                .takes_value(true)
+                .min_values(1)
                 .required(true)
                 .help("ファイルを指定します")))
         .subcommand(SubCommand::with_name("automatic-selection")
