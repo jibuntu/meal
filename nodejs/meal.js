@@ -1,6 +1,22 @@
 const fs = require("fs")
 const spawn = require("child_process").spawnSync
 
+function Command() {
+  this.calc = (path) => {
+    let options = ["c"]
+    
+    if(Array.isArray(path)){
+      path.forEach(p => options.push(p))
+    }else{
+      options.push(path)
+    }
+    
+    let result = spawn("meal", options)
+    console.log(result.stdout.toString())
+    return this
+  }
+}
+
 function Json() {
   this.data = {}
   this.path = ""
@@ -181,6 +197,7 @@ function Foods() {
 }
 
 module.exports = {
+  "Command": Command,
   "Json": Json,
   "Body": Body,
   "Foods": Foods
