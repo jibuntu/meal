@@ -32,13 +32,17 @@ fn search(matches: &ArgMatches) -> Result<(), String> {
         SearchType::And
     };
 
+    let mut name_list = vec!["食品番号".to_string(), "食品名".to_string()];
+    if let Some(values) = matches.values_of("column") {
+        values.into_iter().for_each(|v| name_list.push(v.to_string()));
+    }
+
     let text_list: Vec<_> = matches.values_of("text").unwrap().collect();
-    let mut name_list = match matches.value_of("column-type") {
-        None => vec!["食品番号".to_string(), "食品名".to_string()],
+    match matches.value_of("column-type") {
+        None => (),
         Some(t) => match t {
             "0" => [
-                "食品群", "食品番号", "索引番号", "食品名", "廃棄率", "エネルギー",
-                "エネルギー（kJ)", "水分", "たんぱく質",
+                "廃棄率", "エネルギー", "エネルギー（kJ)", "水分", "たんぱく質",
                 "アミノ酸組成によるたんぱく質", "脂質",
                 "トリアシルグリセロール当量", "飽和脂肪酸", "一価不飽和脂肪酸",
                 "多価不飽和脂肪酸", "コレステロール", "炭水化物",
@@ -54,31 +58,24 @@ fn search(matches: &ArgMatches) -> Result<(), String> {
                 "ビタミンC", "食塩相当量", "アルコール", "硝酸イオン",
                 "テオブロミン", "カフェイン", "タンニン", "ポリフェノール", "酢酸",
                 "調理油", "有機酸", "重量変化率"
-            ].iter().map(|n| n.to_string()).collect(),
+            ].iter().for_each(|v| name_list.push(v.to_string())),
             "1" => [
-                "食品番号", "食品名", "重量", "エネルギー", "たんぱく質", "脂質",
-                "炭水化物", "食物繊維総量", "ナトリウム", "カルシウム", "鉄",
+                "重量", "エネルギー", "たんぱく質", "脂質", "炭水化物",
+                "食物繊維総量", "ナトリウム", "カルシウム", "鉄",
                 "レチノール活性当量", "ビタミンB1", "ビタミンB2", "ビタミンC"
-            ].iter().map(|n| n.to_string()).collect(),
+            ].iter().for_each(|v| name_list.push(v.to_string())),
             "2" => [
-                "食品番号", "食品名", "重量", "エネルギー", "たんぱく質", "脂質",
-                "多価不飽和脂肪酸", "炭水化物", "食物繊維総量",
-                "レチノール活性当量", "ビタミンD", "α-トコフェロール", "ビタミンK",
-                "ビタミンB1", "ビタミンB2", "ナイアシン", "ビタミンB6",
-                "ビタミンB12", "葉酸", "パントテン酸", "ビオチン", "ビタミンC",
-                "ナトリウム", "カリウム", "カルシウム", "マグネシウム", "リン",
-                "鉄", "亜鉛", "銅", "マンガン", "ヨウ素", "セレン", "クロム",
-                "モリブデン"
-            ].iter().map(|n| n.to_string()).collect(),
-
-            _ => vec!["食品番号".to_string(), "食品名".to_string()],
+                "重量", "エネルギー", "たんぱく質", "脂質", "多価不飽和脂肪酸",
+                "炭水化物", "食物繊維総量", "レチノール活性当量", "ビタミンD",
+                "α-トコフェロール", "ビタミンK", "ビタミンB1", "ビタミンB2",
+                "ナイアシン", "ビタミンB6", "ビタミンB12", "葉酸", "パントテン酸",
+                "ビオチン", "ビタミンC", "ナトリウム", "カリウム", "カルシウム",
+                "マグネシウム", "リン", "鉄", "亜鉛", "銅", "マンガン", "ヨウ素",
+                "セレン", "クロム", "モリブデン"
+            ].iter().for_each(|v| name_list.push(v.to_string())),
+            _ => ["食品番号", "食品名"].iter().for_each(|v| name_list.push(v.to_string())),
         }
     };
-
-    if let Some(values) = matches.values_of("column") {
-        let mut ns: Vec<_> = values.into_iter().map(|value| value.to_string()).collect();
-        name_list.append(&mut ns);
-    }
 
     let path = "/home/jibuntu/programming_language/rust/project/meal/data/foods.json";
     let mut foods = match FoodTable::from_json(path) {
