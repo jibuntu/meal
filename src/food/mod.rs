@@ -331,7 +331,7 @@ impl Food {
             name: self.name.clone(),                    // 食品名
             price: self.price.clone(),                    // 価格
             weight: self.weight.rate(rate),             // 重量
-            refuse: self.refuse.rate(rate),             // 廃棄率
+            refuse: self.refuse.clone(),             // 廃棄率
             enerc_kcal: self.enerc_kcal.rate(rate),     // エネルギー（kcal）
             enerc: self.enerc.rate(rate),               // エネルギー（kJ)
             water: self.water.rate(rate),               // 水分
@@ -408,7 +408,7 @@ impl Food {
             name: FoodData::None,
             price: self.price.add(&food.price),
             weight: self.weight.add(&food.weight),
-            refuse: self.refuse.add(&food.refuse),
+            refuse: FoodData::None,
             enerc_kcal: self.enerc_kcal.add(&food.enerc_kcal),
             enerc: self.enerc.add(&food.enerc),
             water: self.water.add(&food.water),
