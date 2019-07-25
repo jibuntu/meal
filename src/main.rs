@@ -133,6 +133,13 @@ fn print_table(path: &str, foods: &FoodTable) -> Result<(), String> {
             food.set("価格", FoodData::Number(price));
         }
 
+        if parsed_food.include_refuse == true {
+            food = match food.include_refuse() {
+                Some(food) => food,
+                None => return Err(format!("{}番の食材は廃棄部分を含めることはできません", &parsed_food.number))
+            };
+        }
+
         food_table.add(food);
     }
 
