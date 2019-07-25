@@ -23,7 +23,8 @@ pub struct ParsedData {
 pub struct ParsedFood {
     pub number: String,
     pub weight: Option<f32>,
-    pub price: Option<f32>
+    pub price: Option<f32>,
+    pub include_refuse: bool
 }
 
 pub struct Body {
@@ -77,10 +78,16 @@ pub fn parse_foods(data: &Value) -> Result<Vec<ParsedFood>, String> {
                     _ => None
                 };
 
+                let include_refuse = match obj.get("include_refuse") {
+                    Some(include_refuse) => value_or_error!(include_refuse.as_bool(), "include_refuseの値はboolにしてください"),
+                    _ => false
+                };
+
                 ParsedFood {
                     number,
                     weight,
-                    price
+                    price,
+                    include_refuse
                 }
             },
             _ => return Err("foodsの値はオブジェクトの配列にしてください".to_string())
@@ -257,4 +264,37 @@ pub fn parse_json<T: std::io::Read>(reader: BufReader<T>) -> Result<ParsedData, 
         body,
         comb
     })
+}
+
+#[test]
+fn test_parse_foods() {
+    let test_json = r#"{
+    "foods": [
+        {"number": "04047"},
+        {"number": "01083", "weight": 112},
+        {"number": "12004", "weight": 50, "include_refuse": true}
+    ],
+    "name_list": ["食品番号", "食品名", "重量", "廃棄率", "エネルギー", "多価不飽和脂肪酸", "ビタミンC", "脂質"],
+    "body": {
+        "age": 20,
+        "weight": 50,
+        "height": 160,
+        "gender": "male",
+        "pal": "low"
+    }
+}"#;
+    let reader = BufReader::new(test_json.as_bytes());
+    let parsed_data = parse_json(reader).unwrap();
+
+    assert_eq!(parsed_data.foods[0].number, "04047".to_string());
+    assert_eq!(parsed_data.foods[0].weight, None);
+    assert_eq!(parsed_data.foods[0].include_refuse, false);
+    
+    assert_eq!(parsed_data.foods[1].number, "01083".to_string());
+    assert_eq!(parsed_data.foods[1].weight, Some(112.0));
+    assert_eq!(parsed_data.foods[1].include_refuse, false);
+   
+    assert_eq!(parsed_data.foods[2].number, "12004".to_string());
+    assert_eq!(parsed_data.foods[2].weight, Some(50.0));
+    assert_eq!(parsed_data.foods[2].include_refuse, true);
 }
