@@ -204,9 +204,7 @@ function Foods() {
   this.changeWeight = (rate) => {
     let data_list = []
     for(let data of this.data_list){
-      let new_data = {
-        "number": data.number
-      }
+      let new_data = Object.assign({}, data)
       
       if(data["weight"] != undefined){
         new_data["weight"] = data["weight"] * rate
@@ -222,6 +220,15 @@ function Foods() {
     foods.data_list = data_list
     
     return foods
+  }
+
+  this.includeRefuse = (bool) => {
+    this.data_list[this.data_list.length - 1]["include_refuse"] = bool
+    return this
+  }
+
+  this.ir = (bool) => {
+    return this.includeRefuse(bool)
   }
 }
 
