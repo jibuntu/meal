@@ -479,6 +479,7 @@ impl Food {
         let refuse = self.refuse.get_number()?;
         if *refuse == 0.0 { return None }
         let weight = self.weight.get_number()?;
+        let price = self.price.clone();
         let rate = 1.0 - (*refuse / 100.0);
         let name = match &self.name {
             FoodData::String(name) => format!("{}　廃棄部分{}%を含む", name, refuse),
@@ -486,10 +487,11 @@ impl Food {
         };
 
         // 重量を変換することで廃棄部分を含めた栄養を計算して、
-        // 重量を戻し、廃棄率を0にする
+        // 重量と価格を戻し、廃棄率を0にする
         // 食品名を変更
         let mut food_including_refuse = self.change_weight(*weight * rate)?;
         food_including_refuse.weight = FoodData::Number(*weight);
+        food_including_refuse.price = price;
         food_including_refuse.refuse = FoodData::Number(0.0);
         food_including_refuse.name = FoodData::String(name);
 
@@ -599,4 +601,7 @@ fn test_food_include_refuse() {
 
     let food_including_refuse = food.include_refuse().unwrap();
     assert_eq!(food_including_refuse.include_refuse(), None);
+
+    food.set("価格", FoodData::Number(100.0));
+    assert_eq!(food.include_refuse().unwrap().get("価格").unwrap(), &FoodData::Number(100.0));
 }
