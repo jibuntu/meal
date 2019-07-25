@@ -474,6 +474,27 @@ impl Food {
             remark: FoodData::None
         }
     }
+
+    pub fn include_refuse(&self) -> Option<Food> {
+        let refuse = self.refuse.get_number()?;
+        if *refuse == 0.0 { return None }
+        let weight = self.weight.get_number()?;
+        let rate = 1.0 - (*refuse / 100.0);
+        let name = match &self.name {
+            FoodData::String(name) => format!("{}　廃棄部分{}%を含む", name, refuse),
+            _ => return None
+        };
+
+        // 重量を変換することで廃棄部分を含めた栄養を計算して、
+        // 重量を戻し、廃棄率を0にする
+        // 食品名を変更
+        let mut food_including_refuse = self.change_weight(*weight * rate)?;
+        food_including_refuse.weight = FoodData::Number(*weight);
+        food_including_refuse.refuse = FoodData::Number(0.0);
+        food_including_refuse.name = FoodData::String(name);
+
+        Some(food_including_refuse)
+    }
 }
 
 
@@ -546,4 +567,36 @@ fn test_food_add() {
     left.set("モリブデン", FoodData::Number(50.0));
     let result = left.add(&right);
     assert_eq!(result.get("モリブデン"), Some(&FoodData::Number(50.0)));
+}
+
+#[test]
+fn test_food_include_refuse() {
+    let mut food = Food::new();
+    assert_eq!(food.include_refuse(), None);
+
+    food.set("重量", FoodData::Number(100.0));
+    assert_eq!(food.include_refuse(), None);
+   
+    food.set("廃棄率", FoodData::Number(10.0));
+    assert_eq!(food.include_refuse(), None);
+
+    food.set("食品名", FoodData::String("食品".to_string()));
+    assert_ne!(food.include_refuse(), None);
+
+    food.set("廃棄率", FoodData::Number(0.0));
+    assert_eq!(food.include_refuse(), None);
+    
+    food.set("廃棄率", FoodData::Number(10.0));
+    assert_eq!(food.include_refuse().unwrap().get("重量").unwrap(), &FoodData::Number(100.0));
+    assert_eq!(food.include_refuse().unwrap().get("廃棄率").unwrap(), &FoodData::Number(0.0));
+    assert_eq!(food.include_refuse().unwrap().get("食品名").unwrap(), &FoodData::String("食品　廃棄部分10%を含む".to_string()));
+
+    food.set("ビタミンC", FoodData::Number(100.0));
+    assert_eq!(food.include_refuse().unwrap().get("ビタミンC").unwrap(), &FoodData::Number(100.0 * 0.9));
+
+    food.set("マグネシウム", FoodData::Number(0.0));
+    assert_eq!(food.include_refuse().unwrap().get("マグネシウム").unwrap(), &FoodData::Number(0.0));
+
+    let food_including_refuse = food.include_refuse().unwrap();
+    assert_eq!(food_including_refuse.include_refuse(), None);
 }
