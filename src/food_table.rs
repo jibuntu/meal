@@ -127,6 +127,9 @@ impl FoodTable {
 
             food.set("価格", FoodData::String("-".to_string()));
             food.set("重量", FoodData::Number(100.0));
+            if let Some(refuse) = food.refuse.get_number() {
+                food.set("可食量", FoodData::Number(100.0 - *refuse));
+            }            
             food_table.add(food);
         }
 
