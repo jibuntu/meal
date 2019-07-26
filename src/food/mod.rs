@@ -11,6 +11,7 @@ pub struct Food {
     pub name: FoodData,         // 食品名
     pub price: FoodData,        // 価格
     pub weight: FoodData,       // 重量
+    pub edible: FoodData,       // 可食量
     pub refuse: FoodData,       // 廃棄率
     pub enerc_kcal: FoodData,   // エネルギー（kcal）
     pub enerc: FoodData,        // エネルギー（kJ)
@@ -86,6 +87,7 @@ impl Food {
             name: FoodData::None,         // 食品名
             price: FoodData::None,        // 価格
             weight: FoodData::None,       // 重量
+            edible: FoodData::None,       // 可食量
             refuse: FoodData::None,       // 廃棄率
             enerc_kcal: FoodData::None,   // エネルギー（kcal）
             enerc: FoodData::None,        // エネルギー（kJ)
@@ -161,6 +163,7 @@ impl Food {
             "食品名" => &mut self.name,
             "価格" => &mut self.price,
             "重量" => &mut self.weight,
+            "可食量" => &mut self.edible,
             "廃棄率" => &mut self.refuse,
             "エネルギー（kcal）" | "エネルギー" => &mut self.enerc_kcal,
             "エネルギー（kJ)" => &mut self.enerc,
@@ -239,6 +242,7 @@ impl Food {
             "食品名" => &self.name,
             "価格" => &self.price,
             "重量" => &self.weight,
+            "可食量" => &self.edible,
             "廃棄率" => &self.refuse,
             "エネルギー（kcal）" | "エネルギー" => &self.enerc_kcal,
             "エネルギー（kJ)" => &self.enerc,
@@ -331,6 +335,7 @@ impl Food {
             name: self.name.clone(),                    // 食品名
             price: self.price.clone(),                    // 価格
             weight: self.weight.rate(rate),             // 重量
+            edible: self.edible.rate(rate),             // 可食量
             refuse: self.refuse.clone(),             // 廃棄率
             enerc_kcal: self.enerc_kcal.rate(rate),     // エネルギー（kcal）
             enerc: self.enerc.rate(rate),               // エネルギー（kJ)
@@ -408,6 +413,7 @@ impl Food {
             name: FoodData::None,
             price: self.price.add(&food.price),
             weight: self.weight.add(&food.weight),
+            edible: self.edible.add(&self.edible),
             refuse: FoodData::None,
             enerc_kcal: self.enerc_kcal.add(&food.enerc_kcal),
             enerc: self.enerc.add(&food.enerc),
@@ -479,6 +485,7 @@ impl Food {
         let refuse = self.refuse.get_number()?;
         if *refuse == 0.0 { return None }
         let weight = self.weight.get_number()?;
+        let edible = self.edible.clone();
         let price = self.price.clone();
         let rate = 1.0 - (*refuse / 100.0);
         let name = match &self.name {
@@ -487,10 +494,11 @@ impl Food {
         };
 
         // 重量を変換することで廃棄部分を含めた栄養を計算して、
-        // 重量と価格を戻し、廃棄率を0にする
+        // 重量と可食量、価格を戻し、廃棄率を0にする
         // 食品名を変更
         let mut food_including_refuse = self.change_weight(*weight * rate)?;
         food_including_refuse.weight = FoodData::Number(*weight);
+        food_including_refuse.edible = edible;
         food_including_refuse.price = price;
         food_including_refuse.refuse = FoodData::Number(0.0);
         food_including_refuse.name = FoodData::String(name);
