@@ -413,7 +413,7 @@ impl Food {
             name: FoodData::None,
             price: self.price.add(&food.price),
             weight: self.weight.add(&food.weight),
-            edible: self.edible.add(&self.edible),
+            edible: self.edible.add(&food.edible),
             refuse: FoodData::None,
             enerc_kcal: self.enerc_kcal.add(&food.enerc_kcal),
             enerc: self.enerc.add(&food.enerc),
