@@ -216,7 +216,7 @@ impl Kijun {
             data_list.insert("多価不飽和脂肪酸".to_string(), pufa);
         }
         
-        if let Ok(fiber) = Kijun::get_fiber(age, gender) {
+        if let Ok(fiber) = Kijun::get_fiber(age, weight) {
             data_list.insert("食物繊維".to_string(), fiber);
             data_list.insert("食物繊維総量".to_string(), fiber);
         }
@@ -556,20 +556,17 @@ impl Kijun {
     }
 
     // 食物繊維
-    pub fn get_fiber(age: usize, gender: Gender) -> Result<KijunValue, String> {
+    pub fn get_fiber(age: usize, weight: f32) -> Result<KijunValue, String> {
         let result = match age {
-            0 ... 5 => {
-                return Err("5歳以下は食物繊維の目標量を求めることができません".to_string())
+            0 ... 17 => {
+                return Err("17歳以下は食物繊維の目標量を求めることができません".to_string())
             },
-            6 ... 7 => {   gender_match!(gender, 11.0, 10.0) },
-            8 ... 9 => {   gender_match!(gender, 12.0, 12.0) },
-            10 ... 11 => { gender_match!(gender, 13.0, 13.0) },
-            12 ... 14 => { gender_match!(gender, 17.0, 16.0) },
-            15 ... 17 => { gender_match!(gender, 19.0, 17.0) },
-            18 ... 29 => { gender_match!(gender, 20.0, 18.0) },
-            30 ... 49 => { gender_match!(gender, 20.0, 18.0) },
-            50 ... 69 => { gender_match!(gender, 20.0, 18.0) },
-            age if 70 <= age => { gender_match!(gender, 19.0, 17.0) },
+            18 ... 69 => {
+                18.9 * (weight / 57.8).powf(0.75)
+            },
+            age if 70 <= age => {
+                return Err("70歳以上は食物繊維の目標量を求めることができません".to_string())
+            },
             _ => {
                 return Err("食物繊維の目標量を求めることができません".to_string())
             }
