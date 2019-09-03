@@ -200,7 +200,7 @@ impl Kijun {
             }
         }
 
-        if let Ok(protein) = Kijun::get_protein(age, gender) {
+        if let Ok(protein) = Kijun::get_protein(age, weight) {
             data_list.insert("たんぱく質".to_string(), protein);
         }
         
@@ -429,22 +429,17 @@ impl Kijun {
     }
 
     // たんぱく質
-    pub fn get_protein(age: usize, gender: Gender) -> Result<KijunValue, String>{
+    pub fn get_protein(age: usize, weight: f32) -> Result<KijunValue, String>{
         let result = match age {
-            0 => {
-                return Err("0歳以下はたんぱく質の推奨量を求めることができません".to_string())
+            0 ... 17 => {
+                return Err("17歳以下はたんぱく質の推奨量を求めることができません".to_string())
             },
-            1 ... 2 => {   gender_match!(gender, 20.0, 20.0) },
-            3 ... 5 => {   gender_match!(gender, 25.0, 25.0) },
-            6 ... 7 => {   gender_match!(gender, 35.0, 30.0) },
-            8 ... 9 => {   gender_match!(gender, 40.0, 40.0) },
-            10 ... 11 => { gender_match!(gender, 50.0, 50.0) },
-            12 ... 14 => { gender_match!(gender, 60.0, 55.0) },
-            15 ... 17 => { gender_match!(gender, 65.0, 55.0) },
-            18 ... 29 => { gender_match!(gender, 60.0, 50.0) },
-            30 ... 49 => { gender_match!(gender, 60.0, 50.0) },
-            50 ... 69 => { gender_match!(gender, 60.0, 50.0) },
-            age if 70 <= age => { gender_match!(gender, 60.0, 50.0) },
+            18 ... 69 => {
+                (0.72 * weight) * 1.25
+            },
+            age if 70 <= age => {
+                return Err("70歳以上はたんぱく質の推奨量を求めることができません".to_string())
+            },
             _ => {
                 return Err("たんぱく質の推奨量を求めることができません".to_string())
             }
