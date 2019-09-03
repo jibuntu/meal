@@ -4,8 +4,8 @@ let command = new meal.Command()
 let body = new meal.Body()
 
 body
-  .age(20)
-  .weight(50)
+  .age(19)
+  .weight(53)
   .height(160)
   .gender("male")
   .pal(1)
@@ -30,6 +30,14 @@ let json = new meal.Json()
   .write()
 
 foods = foods.changeWeight(0.5)
+
+body = new meal.Body()
+  .age(19)
+  .weight(53)
+  .height(160)
+  .gender("male")
+  .pal(1)
+  .days(1)
 
 json = new meal.Json()
   .body(body)
