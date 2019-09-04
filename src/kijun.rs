@@ -289,7 +289,7 @@ impl Kijun {
             data_list.insert("カルシウム".to_string(), calcium);
         }
 
-        if let Ok(magnesium) = Kijun::get_magnesium(age, gender) {
+        if let Ok(magnesium) = Kijun::get_magnesium(age, weight) {
             data_list.insert("マグネシウム".to_string(), magnesium);
         }
 
@@ -948,22 +948,15 @@ impl Kijun {
     }
 
     // マグネシウム
-    pub fn get_magnesium(age: usize, gender: Gender) -> Result<KijunValue, String> {
+    pub fn get_magnesium(age: usize, weight: f32) -> Result<KijunValue, String> {
         let result = match age {
-            0 => {
-                return Err("0歳以下はマグネシウムの推奨量を求めることができません".to_string())
+            0 ... 17 => {
+                return Err("17歳以下はマグネシウムの推奨量を求めることができません".to_string())
             },
-            1 ... 2 => {   gender_match!(gender,  70.0,  70.0) },
-            3 ... 5 => {   gender_match!(gender, 100.0, 100.0) },
-            6 ... 7 => {   gender_match!(gender, 130.0, 130.0) },
-            8 ... 9 => {   gender_match!(gender, 170.0, 160.0) },
-            10 ... 11 => { gender_match!(gender, 210.0, 220.0) },
-            12 ... 14 => { gender_match!(gender, 290.0, 290.0) },
-            15 ... 17 => { gender_match!(gender, 360.0, 310.0) },
-            18 ... 29 => { gender_match!(gender, 340.0, 270.0) },
-            30 ... 49 => { gender_match!(gender, 370.0, 290.0) },
-            50 ... 69 => { gender_match!(gender, 350.0, 290.0) },
-            age if 70 <= age => { gender_match!(gender, 320.0, 270.0) },
+            age if 18 <= age => {
+                // https://www.mhlw.go.jp/file/05-Shingikai-10901000-Kenkoukyoku-Soumuka/0000114399.pdf - 263 page
+                (4.5 * weight) * 1.2
+            },
             _ => {
                 return Err("マグネシウムの推奨量を求めることができません".to_string())
             }
