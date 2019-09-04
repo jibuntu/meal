@@ -221,7 +221,7 @@ impl Kijun {
             data_list.insert("食物繊維総量".to_string(), fiber);
         }
 
-        if let Ok(vitamin_a) = Kijun::get_vitamin_a(age, gender) {
+        if let Ok(vitamin_a) = Kijun::get_vitamin_a(age, weight) {
             data_list.insert("ビタミンA".to_string(), vitamin_a);
             data_list.insert("レチノール活性当量".to_string(), vitamin_a);
         }
@@ -576,22 +576,18 @@ impl Kijun {
     }
 
     // ビタミンA
-    pub fn get_vitamin_a(age: usize, gender: Gender) -> Result<KijunValue, String> {
+    pub fn get_vitamin_a(age: usize, weight: f32) -> Result<KijunValue, String> {
         let result = match age {
-            0 => {
-                return Err("0歳以下はビタミンAの推奨量を求めることができません".to_string())
+            0 ... 17 => {
+                return Err("17歳以下はビタミンAの推奨量を求めることができません".to_string())
             },
-            1 ... 2 => {   gender_match!(gender, 400.0, 350.0) },
-            3 ... 5 => {   gender_match!(gender, 500.0, 400.0) },
-            6 ... 7 => {   gender_match!(gender, 450.0, 400.0) },
-            8 ... 9 => {   gender_match!(gender, 500.0, 500.0) },
-            10 ... 11 => { gender_match!(gender, 600.0, 600.0) },
-            12 ... 14 => { gender_match!(gender, 800.0, 700.0) },
-            15 ... 17 => { gender_match!(gender, 900.0, 650.0) },
-            18 ... 29 => { gender_match!(gender, 850.0, 650.0) },
-            30 ... 49 => { gender_match!(gender, 900.0, 700.0) },
-            50 ... 69 => { gender_match!(gender, 850.0, 700.0) },
-            age if 70 <= age => { gender_match!(gender, 800.0, 650.0) },
+            18 ... 69 => {
+                // https://www.mhlw.go.jp/file/05-Shingikai-10901000-Kenkoukyoku-Soumuka/0000114399.pdf - 166 page
+                (9.3 * weight) * 1.4
+            },
+            age if 70 <= age => {
+                return Err("70歳以上はビタミンAの推奨量を求めることができません".to_string())
+            },
             _ => {
                 return Err("ビタミンAの推奨量を求めることができません".to_string())
             }
