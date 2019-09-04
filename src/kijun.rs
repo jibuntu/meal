@@ -435,6 +435,7 @@ impl Kijun {
                 return Err("17歳以下はたんぱく質の推奨量を求めることができません".to_string())
             },
             18 ... 69 => {
+                // https://www.mhlw.go.jp/file/05-Shingikai-10901000-Kenkoukyoku-Soumuka/0000114399.pdf - 91 page
                 (0.72 * weight) * 1.25
             },
             age if 70 <= age => {
@@ -562,6 +563,7 @@ impl Kijun {
                 return Err("17歳以下は食物繊維の目標量を求めることができません".to_string())
             },
             18 ... 69 => {
+                // https://www.mhlw.go.jp/file/05-Shingikai-10901000-Kenkoukyoku-Soumuka/0000114399.pdf - 146 page
                 18.9 * (weight / 57.8).powf(0.75)
             },
             age if 70 <= age => {
