@@ -214,6 +214,12 @@ impl Kijun {
 
         if let Ok(protein) = Kijun::get_protein(age, weight) {
             data_list.insert("たんぱく質".to_string(), protein);
+
+            if let KijunValue::More(protein_val) = protein {
+                if let Ok(vitamin_b6) = Kijun::get_vitamin_b6(age, protein_val) {
+                    data_list.insert("ビタミンB6".to_string(), vitamin_b6);
+                }
+            }
         }
         
         if let Ok(n6_fatty_acid) = Kijun::get_n6_fatty_acid(age, gender) {
@@ -249,10 +255,6 @@ impl Kijun {
 
         if let Ok(vitamin_k) = Kijun::get_vitamin_k(age, gender) {
             data_list.insert("ビタミンK".to_string(), vitamin_k);
-        }
-
-        if let Ok(vitamin_b6) = Kijun::get_vitamin_b6(age, gender) {
-            data_list.insert("ビタミンB6".to_string(), vitamin_b6);
         }
 
         if let Ok(vitamin_b12) = Kijun::get_vitamin_b12(age, gender) {
@@ -728,22 +730,15 @@ impl Kijun {
     }
 
     // ビタミンB6
-    pub fn get_vitamin_b6(age: usize, gender: Gender) -> Result<KijunValue, String> {
+    pub fn get_vitamin_b6(age: usize, protein: f32) -> Result<KijunValue, String> {
         let result = match age {
             0 => {
                 return Err("0歳以下はビタミンB6の推奨量を求めることができません".to_string())
             },
-            1 ... 2 => {   gender_match!(gender, 0.5, 0.5) },
-            3 ... 5 => {   gender_match!(gender, 0.6, 0.6) },
-            6 ... 7 => {   gender_match!(gender, 0.8, 0.7) },
-            8 ... 9 => {   gender_match!(gender, 0.9, 0.9) },
-            10 ... 11 => { gender_match!(gender, 1.2, 1.2) },
-            12 ... 14 => { gender_match!(gender, 1.4, 1.3) },
-            15 ... 17 => { gender_match!(gender, 1.5, 1.3) },
-            18 ... 29 => { gender_match!(gender, 1.4, 1.2) },
-            30 ... 49 => { gender_match!(gender, 1.4, 1.2) },
-            50 ... 69 => { gender_match!(gender, 1.4, 1.2) },
-            age if 70 <= age => { gender_match!(gender, 1.4, 1.2) },
+            age if 1 <= age => {
+                // https://www.mhlw.go.jp/file/05-Shingikai-10901000-Kenkoukyoku-Soumuka/0000114399.pdf - 207 page
+                ((0.014 / 0.73) * protein) * 1.2
+            },
             _ => {
                 return Err("ビタミンB6の推奨量を求めることができません".to_string())
             }
