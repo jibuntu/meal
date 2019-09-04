@@ -202,6 +202,10 @@ impl Kijun {
             if let Ok(vitamin_b1) = Kijun::get_vitamin_b1(age, energy_val) {
                 data_list.insert("ビタミンB1".to_string(), vitamin_b1);
             }
+   
+            if let Ok(vitamin_b2) = Kijun::get_vitamin_b2(age, energy_val) {
+                data_list.insert("ビタミンB2".to_string(), vitamin_b2);
+            }
         }
 
         if let Ok(protein) = Kijun::get_protein(age, weight) {
@@ -241,10 +245,6 @@ impl Kijun {
 
         if let Ok(vitamin_k) = Kijun::get_vitamin_k(age, gender) {
             data_list.insert("ビタミンK".to_string(), vitamin_k);
-        }
-
-        if let Ok(vitamin_b2) = Kijun::get_vitamin_b2(age, gender) {
-            data_list.insert("ビタミンB2".to_string(), vitamin_b2);
         }
 
         if let Ok(niacin) = Kijun::get_niacin(age, gender) {
@@ -692,22 +692,15 @@ impl Kijun {
     }
 
     // ビタミンB2
-    pub fn get_vitamin_b2(age: usize, gender: Gender) -> Result<KijunValue, String> {
+    pub fn get_vitamin_b2(age: usize, energy: f32) -> Result<KijunValue, String> {
         let result = match age {
             0 => {
                 return Err("0歳以下はビタミンB2の推奨量を求めることができません".to_string())
             },
-            1 ... 2 => {   gender_match!(gender, 0.6, 0.5) },
-            3 ... 5 => {   gender_match!(gender, 0.8, 0.8) },
-            6 ... 7 => {   gender_match!(gender, 0.9, 0.9) },
-            8 ... 9 => {   gender_match!(gender, 1.1, 0.0) },
-            10 ... 11 => { gender_match!(gender, 1.4, 1.3) },
-            12 ... 14 => { gender_match!(gender, 1.6, 1.4) },
-            15 ... 17 => { gender_match!(gender, 1.7, 1.4) },
-            18 ... 29 => { gender_match!(gender, 1.6, 1.2) },
-            30 ... 49 => { gender_match!(gender, 1.6, 1.2) },
-            50 ... 69 => { gender_match!(gender, 1.5, 1.1) },
-            age if 70 <= age => { gender_match!(gender, 1.3, 1.1) },
+            age if 1 <= age => {
+                // https://www.mhlw.go.jp/file/05-Shingikai-10901000-Kenkoukyoku-Soumuka/0000114399.pdf - 200 page
+                ((energy / 1000.0) * 0.5) * 1.2
+            },
             _ => {
                 return Err("ビタミンB2の推奨量を求めることができません".to_string())
             }
