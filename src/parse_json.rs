@@ -1,4 +1,4 @@
-use std::io::{BufReader, Read};
+use std::io::BufReader;
 
 use serde_json::Value;
 

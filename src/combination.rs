@@ -27,7 +27,6 @@ pub struct CombIterator<'a, T> {
 
 impl<'a, T> CombIterator<'a, T> {
     fn new(comb: &'a Combination<T>) -> CombIterator<'a, T> {
-        let mut keys: Vec<usize> = (0..comb.data_list.len()).collect();
         let mut keys_list = Vec::new();
         let result = Rc::new(vec![&comb.data_list[0];comb.length_of_combination]);
 
@@ -110,12 +109,12 @@ fn test_comb_iterator() {
 
     let data_list = vec![1, 2, 3, 4, 5];
     let comb = Combination::new(data_list, 3);
-    let list: Vec<usize> = comb.iter().map(|c| 0).collect();
+    let list: Vec<usize> = comb.iter().map(|_| 0).collect();
     assert_eq!(list.len(), (5 * 4 * 3) / (3 * 2 * 1));
 
     let data_list = vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
     let comb = Combination::new(data_list, 5);
-    let list: Vec<usize> = comb.iter().map(|c| 0).collect();
+    let list: Vec<usize> = comb.iter().map(|_| 0).collect();
     assert_eq!(list.len(), (10 * 9 * 8 * 7 * 6) / (5 * 4 * 3 * 2 * 1));
 }
 
@@ -131,9 +130,9 @@ fn test_comb_speed() {
     ];
     let comb = Combination::new(data_list, 5);
     let mut iter = comb.iter();
-    let mut count = 2118760;
+    let count = 2118760;
 
-    for i in 0..count {
+    for _ in 0..count {
         iter.next();
     }
 

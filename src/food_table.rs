@@ -1,14 +1,15 @@
+#![allow(dead_code)]
+
 use std::fs::File;
 use std::io::BufReader;
 use std::slice::Iter;
 
 use serde_json::Value;
-use prettytable::{Table, Row, Cell, Attr};
+use prettytable::{Table, Row, Cell};
 
 use crate::food::Food;
 use crate::food::food_data::FoodData;
-use crate::kijun::{Kijun, Gender, PAL, KijunValue};
-use std::collections::HashMap;
+use crate::kijun::{Kijun, KijunValue};
 
 
 macro_rules! value_or_error {
@@ -172,7 +173,7 @@ impl FoodTable {
     }
 
     pub fn set_weight(&mut self, weight: f32) {
-        for (key, food) in &mut self.food_list {
+        for (_, food) in &mut self.food_list {
             if let Some(new_food) = food.change_weight(weight) {
                 *food = new_food;
             }
@@ -268,7 +269,7 @@ impl FoodTable {
 
         table.set_titles(Row::new(header));
 
-        for (key, food) in &self.food_list {
+        for (_, food) in &self.food_list {
             let mut row = Vec::new();
             for (food_data, name)
                 in food.get_list(name_list).iter().zip(name_list.iter()) {
@@ -344,7 +345,7 @@ impl FoodTable {
             if *name == "食品名" {
                 row.push(Cell::new(&color(&format!("摂取基準に対する割合（{}日分）", kijun.days), "g+")));
             } else {
-                let mut data = match food_data.unwrap_or(&FoodData::None).get_number() {
+                let data = match food_data.unwrap_or(&FoodData::None).get_number() {
                     Some(num) => match kijun_value {
                         Some(kijun_value) => {
                             let per = kijun_value.get_percentage(*num);
@@ -365,7 +366,7 @@ impl FoodTable {
 
 
     pub fn print(&self, name_list: &[&str]) {
-        let mut table = self.get_table(name_list);
+        let table = self.get_table(name_list);
 
         table.printstd();
     }
@@ -436,209 +437,217 @@ impl FoodTable {
 }
 
 
-#[test]
-fn test_food_table_new() {
-    let food_table = FoodTable::new();
-}
+#[cfg(test)]
+mod test {
+    use crate::food::Food;
+    use crate::FoodTable;
+    use crate::FoodData;
+    use crate::kijun::{Kijun, Gender, PAL};
 
-#[test]
-fn test_food_table_add() {
-    let mut food_table = FoodTable::new();
-    let mut food = Food::new();
-    food.set("食品番号", FoodData::from_str("0"));
-    food.set("食品名", FoodData::from_str("麦ごはん"));
-    food_table.add(food);
 
-    let food = &food_table.food_list[0].1;
-    assert_eq!(food.get("食品名"), Some(&FoodData::from_str("麦ごはん")));
-    assert_eq!(food.get("食品群"), Some(&FoodData::None));
-}
-
-#[test]
-fn test_food_table_from_json() {
-    let food_table = FoodTable::from_json("./test/test_foods.json").unwrap();
-    for (key, _food) in &food_table.food_list {
-        match key.as_str() {
-            "01001" | "01002" | "01003" | "01004" | "01005" |
-            "01006" | "18015" | "18016" | "18022" => (),
-            _ => panic!(format!("key is {}", key))
-        }
+    #[test]
+    fn test_food_table_new() {
+        FoodTable::new();
     }
-    let food = food_table.get("01001").unwrap();
-    assert_eq!(food.get("食品群").unwrap(), &FoodData::String("01".to_string()));
-}
 
-#[test]
-fn test_food_table_iter() {
-    let food_table = FoodTable::from_json("./test/test_foods.json").unwrap();
-    for (s, f) in food_table.iter() {
-        for (s, f) in food_table.iter() {
+    #[test]
+    fn test_food_table_add() {
+        let mut food_table = FoodTable::new();
+        let mut food = Food::new();
+        food.set("食品番号", FoodData::from_str("0"));
+        food.set("食品名", FoodData::from_str("麦ごはん"));
+        food_table.add(food);
+
+        let food = &food_table.food_list[0].1;
+        assert_eq!(food.get("食品名"), Some(&FoodData::from_str("麦ごはん")));
+        assert_eq!(food.get("食品群"), Some(&FoodData::None));
+    }
+
+    #[test]
+    fn test_food_table_from_json() {
+        let food_table = FoodTable::from_json("./test/test_foods.json").unwrap();
+        for (key, _food) in &food_table.food_list {
+            match key.as_str() {
+                "01001" | "01002" | "01003" | "01004" | "01005" |
+                "01006" | "18015" | "18016" | "18022" => (),
+                _ => panic!(format!("key is {}", key))
+            }
+        }
+        let food = food_table.get("01001").unwrap();
+        assert_eq!(food.get("食品群").unwrap(), &FoodData::String("01".to_string()));
+    }
+
+    #[test]
+    fn test_food_table_iter() {
+        let food_table = FoodTable::from_json("./test/test_foods.json").unwrap();
+        for _ in food_table.iter() {
             food_table.get_sum();
         }
     }
-}
 
-#[test]
-fn test_food_table_get() {
-    let food_table = FoodTable::from_json("./test/test_foods.json").unwrap();
-    let food = food_table.get("01001").unwrap();
-    assert_eq!(food.get("食品名").unwrap(), &FoodData::String("アマランサス　玄穀".to_string()))
-}
+    #[test]
+    fn test_food_table_get() {
+        let food_table = FoodTable::from_json("./test/test_foods.json").unwrap();
+        let food = food_table.get("01001").unwrap();
+        assert_eq!(food.get("食品名").unwrap(), &FoodData::String("アマランサス　玄穀".to_string()))
+    }
 
-#[test]
-fn test_food_table_get_list() {
-    let food_table = FoodTable::from_json("./test/test_foods.json").unwrap();
-    let food_table = food_table.get_list(&["01001", "01002", "18022"]);
-    let keys: Vec<_> =  food_table.food_list.iter().map(|(key, food)| key).collect();
-    assert!(keys.contains(&&"01001".to_string()));
-    assert!(keys.contains(&&"01002".to_string()));
-    assert!(keys.contains(&&"18022".to_string()));
-}
+    #[test]
+    fn test_food_table_get_list() {
+        let food_table = FoodTable::from_json("./test/test_foods.json").unwrap();
+        let food_table = food_table.get_list(&["01001", "01002", "18022"]);
+        let keys: Vec<_> =  food_table.food_list.iter().map(|(key, _)| key).collect();
+        assert!(keys.contains(&&"01001".to_string()));
+        assert!(keys.contains(&&"01002".to_string()));
+        assert!(keys.contains(&&"18022".to_string()));
+    }
 
-#[test]
-fn test_food_table_get_sum() {
-    let food_table = FoodTable::from_json("./test/test_foods.json").unwrap();
-    let food_table = food_table.get_list(&["01001", "01002", "01003", "01004"]);
-    let sum = food_table.get_sum();
-    assert_eq!(sum.get("たんぱく質").unwrap().to_string(), "42.7");
-    let sum = food_table.get_sum();
-    assert_eq!(sum.get("食品名").unwrap().to_string(), "-");
-}
+    #[test]
+    fn test_food_table_get_sum() {
+        let food_table = FoodTable::from_json("./test/test_foods.json").unwrap();
+        let food_table = food_table.get_list(&["01001", "01002", "01003", "01004"]);
+        let sum = food_table.get_sum();
+        assert_eq!(sum.get("たんぱく質").unwrap().to_string(), "42.7");
+        let sum = food_table.get_sum();
+        assert_eq!(sum.get("食品名").unwrap().to_string(), "-");
+    }
 
-#[test]
-fn test_food_table_set_weight() {
-    let mut food_table = FoodTable::from_json("./test/test_foods.json").unwrap();
-    assert_eq!(food_table.get("01001").unwrap().get("重量"), Some(&FoodData::Number(100.0)));
+    #[test]
+    fn test_food_table_set_weight() {
+        let mut food_table = FoodTable::from_json("./test/test_foods.json").unwrap();
+        assert_eq!(food_table.get("01001").unwrap().get("重量"), Some(&FoodData::Number(100.0)));
 
-    food_table.set_weight(50.0);
-    assert_eq!(food_table.get("01001").unwrap().get("重量"), Some(&FoodData::Number(50.0)))
-}
+        food_table.set_weight(50.0);
+        assert_eq!(food_table.get("01001").unwrap().get("重量"), Some(&FoodData::Number(50.0)))
+    }
 
-#[test]
-fn test_food_table_search() {
-    let food_table = FoodTable::from_json("./test/test_foods.json").unwrap();
-    let food_table = food_table.search("むぎ");
-    for (key, _food) in &food_table.food_list {
-        match key.as_str() {
-            "01005" | "01006" => (),
-            _ => panic!(format!("key is {}", key))
+    #[test]
+    fn test_food_table_search() {
+        let food_table = FoodTable::from_json("./test/test_foods.json").unwrap();
+        let food_table = food_table.search("むぎ");
+        for (key, _food) in &food_table.food_list {
+            match key.as_str() {
+                "01005" | "01006" => (),
+                _ => panic!(format!("key is {}", key))
+            }
         }
     }
-}
 
-#[test]
-fn test_food_table_search_or() {
-    let food_table = FoodTable::from_json("./test/test_foods.json").unwrap();
-    let food_table = food_table.search_or(&["あわ", "むぎ"]);
-    let keys: Vec<_> =  food_table.food_list.iter().map(|(key, food)| key).collect();
-    assert!(keys.contains(&&"01002".to_string()));
-    assert!(keys.contains(&&"01003".to_string()));
-    assert!(keys.contains(&&"01005".to_string()));
-    assert!(keys.contains(&&"01006".to_string()));
-}
+    #[test]
+    fn test_food_table_search_or() {
+        let food_table = FoodTable::from_json("./test/test_foods.json").unwrap();
+        let food_table = food_table.search_or(&["あわ", "むぎ"]);
+        let keys: Vec<_> =  food_table.food_list.iter().map(|(key, _)| key).collect();
+        assert!(keys.contains(&&"01002".to_string()));
+        assert!(keys.contains(&&"01003".to_string()));
+        assert!(keys.contains(&&"01005".to_string()));
+        assert!(keys.contains(&&"01006".to_string()));
+    }
 
-#[test]
-fn test_food_table_search_and() {
-    let food_table = FoodTable::from_json("./test/test_foods.json").unwrap();
-    let food_table = food_table.search_and(&["冷凍", "メンチ"]);
-    let keys: Vec<_> =  food_table.food_list.iter().map(|(key, food)| key).collect();
-    assert!(keys.contains(&&"18016".to_string()));
-    assert!(keys.contains(&&"18022".to_string()));
-}
+    #[test]
+    fn test_food_table_search_and() {
+        let food_table = FoodTable::from_json("./test/test_foods.json").unwrap();
+        let food_table = food_table.search_and(&["冷凍", "メンチ"]);
+        let keys: Vec<_> =  food_table.food_list.iter().map(|(key, _)| key).collect();
+        assert!(keys.contains(&&"18016".to_string()));
+        assert!(keys.contains(&&"18022".to_string()));
+    }
 
-#[test]
-fn test_food_table_ascending_order() {
-    let mut food_table = FoodTable::from_json("./test/test_foods.json").unwrap();
-    let mut iter = food_table.iter();
-    assert_eq!(iter.next().unwrap().1.get("食品番号").unwrap(), &FoodData::String("01001".to_string()));
+    #[test]
+    fn test_food_table_ascending_order() {
+        let mut food_table = FoodTable::from_json("./test/test_foods.json").unwrap();
+        let mut iter = food_table.iter();
+        assert_eq!(iter.next().unwrap().1.get("食品番号").unwrap(), &FoodData::String("01001".to_string()));
 
-    food_table.sort_ascending_order("エネルギー");
-    let mut iter = food_table.iter();
-    assert_eq!(iter.next().unwrap().1.get("食品番号").unwrap(), &FoodData::String("18016".to_string()));
-    assert_eq!(iter.next().unwrap().1.get("食品番号").unwrap(), &FoodData::String("01003".to_string()));
-    assert_eq!(iter.next().unwrap().1.get("食品番号").unwrap(), &FoodData::String("18015".to_string()));
+        food_table.sort_ascending_order("エネルギー");
+        let mut iter = food_table.iter();
+        assert_eq!(iter.next().unwrap().1.get("食品番号").unwrap(), &FoodData::String("18016".to_string()));
+        assert_eq!(iter.next().unwrap().1.get("食品番号").unwrap(), &FoodData::String("01003".to_string()));
+        assert_eq!(iter.next().unwrap().1.get("食品番号").unwrap(), &FoodData::String("18015".to_string()));
 
-    food_table.sort_ascending_order("食品名");
-    let mut iter = food_table.iter();
-    assert_eq!(iter.next().unwrap().1.get("食品番号").unwrap(), &FoodData::String("18016".to_string()));
-    assert_eq!(iter.next().unwrap().1.get("食品番号").unwrap(), &FoodData::String("01003".to_string()));
-    assert_eq!(iter.next().unwrap().1.get("食品番号").unwrap(), &FoodData::String("18015".to_string()));
-}
+        food_table.sort_ascending_order("食品名");
+        let mut iter = food_table.iter();
+        assert_eq!(iter.next().unwrap().1.get("食品番号").unwrap(), &FoodData::String("18016".to_string()));
+        assert_eq!(iter.next().unwrap().1.get("食品番号").unwrap(), &FoodData::String("01003".to_string()));
+        assert_eq!(iter.next().unwrap().1.get("食品番号").unwrap(), &FoodData::String("18015".to_string()));
+    }
 
-#[test]
-fn test_food_table_descending_order() {
-    let mut food_table = FoodTable::from_json("./test/test_foods.json").unwrap();
-    let mut iter = food_table.iter();
-    assert_eq!(iter.next().unwrap().1.get("食品番号").unwrap(), &FoodData::String("01001".to_string()));
 
-    food_table.sort_descending_order("エネルギー");
-    let mut iter = food_table.iter();
-    assert_eq!(iter.next().unwrap().1.get("食品番号").unwrap(), &FoodData::String("01004".to_string()));
-    assert_eq!(iter.next().unwrap().1.get("食品番号").unwrap(), &FoodData::String("01002".to_string()));
-    assert_eq!(iter.next().unwrap().1.get("食品番号").unwrap(), &FoodData::String("01001".to_string()));
+    #[test]
+    fn test_food_table_descending_order() {
+        let mut food_table = FoodTable::from_json("./test/test_foods.json").unwrap();
+        let mut iter = food_table.iter();
+        assert_eq!(iter.next().unwrap().1.get("食品番号").unwrap(), &FoodData::String("01001".to_string()));
+        
+        food_table.sort_descending_order("エネルギー");
+        let mut iter = food_table.iter();
+        assert_eq!(iter.next().unwrap().1.get("食品番号").unwrap(), &FoodData::String("01004".to_string()));
+        assert_eq!(iter.next().unwrap().1.get("食品番号").unwrap(), &FoodData::String("01002".to_string()));
+        assert_eq!(iter.next().unwrap().1.get("食品番号").unwrap(), &FoodData::String("01001".to_string()));
+        
+        food_table.sort_ascending_order("食品名");
+        let mut iter = food_table.iter();
+        assert_eq!(iter.next().unwrap().1.get("食品番号").unwrap(), &FoodData::String("01004".to_string()));
+        assert_eq!(iter.next().unwrap().1.get("食品番号").unwrap(), &FoodData::String("01002".to_string()));
+        assert_eq!(iter.next().unwrap().1.get("食品番号").unwrap(), &FoodData::String("01001".to_string()));
+    }
+    
+    #[test]
+    fn test_food_table_percentage_of_kijun() {
+        let food_table = FoodTable::new();
+        let kijun = Kijun::new(20, 50.0, 160.0, Gender::Male, PAL::Low, 1);
+        assert_eq!(food_table.percentage_of_kijun(&kijun), None);
 
-    food_table.sort_ascending_order("食品名");
-    let mut iter = food_table.iter();
-    assert_eq!(iter.next().unwrap().1.get("食品番号").unwrap(), &FoodData::String("01004".to_string()));
-    assert_eq!(iter.next().unwrap().1.get("食品番号").unwrap(), &FoodData::String("01002".to_string()));
-    assert_eq!(iter.next().unwrap().1.get("食品番号").unwrap(), &FoodData::String("01001".to_string()));
-}
-
-#[test]
-fn test_food_table_percentage_of_kijun() {
-    let food_table = FoodTable::new();
-    let kijun = Kijun::new(20, 50.0, 160.0, Gender::Male, PAL::Low, 1);
-    assert_eq!(food_table.percentage_of_kijun(&kijun), None);
-
-    let food_table = FoodTable::from_json("./test/test_foods.json").unwrap();
-    assert!(food_table.percentage_of_kijun(&kijun).is_some());
-
-    //for key in KIJUN_KEY_LIST.iter() {
-    //    println!("key {}, {:?}", key, kijun.get(key));
-    //}
-
-    // 摂取基準を完全に満たす食材を作成して、割合が100になればよい
-    let mut food_table = FoodTable::new();
-    let mut food = Food::new();
-    food.set("エネルギー", FoodData::Number(1952.7593));
-    food.set("たんぱく質", FoodData::Number(60.0));
-    food.set("脂質", FoodData::Number(44.0));
-    food.set("飽和脂肪酸", FoodData::Number(14.0));
-    food.set("多価不飽和脂肪酸", FoodData::Number(13.0));
-    food.set("炭水化物", FoodData::Number(245.0));
-    food.set("食物繊維総量", FoodData::Number(20.0));
-    food.set("レチノール活性当量", FoodData::Number(850.0));
-    food.set("ビタミンD", FoodData::Number(5.5));
-    food.set("α-トコフェロール", FoodData::Number(6.5));
-    food.set("ビタミンK", FoodData::Number(150.0));
-    food.set("ビタミンB1", FoodData::Number(1.4));
-    food.set("ビタミンB2", FoodData::Number(1.6));
-    food.set("ナイアシン", FoodData::Number(15.0));
-    food.set("ビタミンB6", FoodData::Number(1.4));
-    food.set("ビタミンB12", FoodData::Number(2.4));
-    food.set("葉酸", FoodData::Number(240.0));
-    food.set("パントテン酸", FoodData::Number(5.0));
-    food.set("ビオチン", FoodData::Number(50.0));
-    food.set("ビタミンC", FoodData::Number(100.0));
-    food.set("ナトリウム", FoodData::Number(3148.0));
-    food.set("カリウム", FoodData::Number(2500.0));
-    food.set("カルシウム", FoodData::Number(800.0));
-    food.set("マグネシウム", FoodData::Number(340.0));
-    food.set("リン", FoodData::Number(1000.0));
-    food.set("鉄", FoodData::Number(7.0));
-    food.set("亜鉛", FoodData::Number(10.0));
-    food.set("銅", FoodData::Number(0.9));
-    food.set("マンガン", FoodData::Number(4.0));
-    food.set("ヨウ素", FoodData::Number(130.0));
-    food.set("セレン", FoodData::Number(30.0));
-    food.set("クロム", FoodData::Number(10.0));
-    food.set("モリブデン", FoodData::Number(25.0));
-    food_table.add(food.clone());
-    assert_eq!(food_table.percentage_of_kijun(&kijun), Some(100.0));
-
-    let mut food_table = FoodTable::new();
-    food.set("ナトリウム", FoodData::Number(4000.0));
-    food_table.add(food.clone());
-    // ナトリウムが過剰で他の栄養が完全な場合、割合が100以下になるはず
-    assert!(food_table.percentage_of_kijun(&kijun).unwrap() < 100.0);
+        let food_table = FoodTable::from_json("./test/test_foods.json").unwrap();
+        assert!(food_table.percentage_of_kijun(&kijun).is_some());
+        
+        //for key in KIJUN_KEY_LIST.iter() {
+        //    println!("key {}, {:?}", key, kijun.get(key));
+        //}
+        
+        // 摂取基準を完全に満たす食材を作成して、割合が100になればよい
+        let mut food_table = FoodTable::new();
+        let mut food = Food::new();
+        food.set("エネルギー", FoodData::Number(1952.7593));
+        food.set("たんぱく質", FoodData::Number(60.0));
+        food.set("脂質", FoodData::Number(44.0));
+        food.set("飽和脂肪酸", FoodData::Number(14.0));
+        food.set("多価不飽和脂肪酸", FoodData::Number(13.0));
+        food.set("炭水化物", FoodData::Number(245.0));
+        food.set("食物繊維総量", FoodData::Number(20.0));
+        food.set("レチノール活性当量", FoodData::Number(850.0));
+        food.set("ビタミンD", FoodData::Number(5.5));
+        food.set("α-トコフェロール", FoodData::Number(6.5));
+        food.set("ビタミンK", FoodData::Number(150.0));
+        food.set("ビタミンB1", FoodData::Number(1.4));
+        food.set("ビタミンB2", FoodData::Number(1.6));
+        food.set("ナイアシン", FoodData::Number(15.0));
+        food.set("ビタミンB6", FoodData::Number(1.4));
+        food.set("ビタミンB12", FoodData::Number(2.4));
+        food.set("葉酸", FoodData::Number(240.0));
+        food.set("パントテン酸", FoodData::Number(5.0));
+        food.set("ビオチン", FoodData::Number(50.0));
+        food.set("ビタミンC", FoodData::Number(100.0));
+        food.set("ナトリウム", FoodData::Number(3148.0));
+        food.set("カリウム", FoodData::Number(2500.0));
+        food.set("カルシウム", FoodData::Number(800.0));
+        food.set("マグネシウム", FoodData::Number(340.0));
+        food.set("リン", FoodData::Number(1000.0));
+        food.set("鉄", FoodData::Number(7.0));
+        food.set("亜鉛", FoodData::Number(10.0));
+        food.set("銅", FoodData::Number(0.9));
+        food.set("マンガン", FoodData::Number(4.0));
+        food.set("ヨウ素", FoodData::Number(130.0));
+        food.set("セレン", FoodData::Number(30.0));
+        food.set("クロム", FoodData::Number(10.0));
+        food.set("モリブデン", FoodData::Number(25.0));
+        food_table.add(food.clone());
+        assert_eq!(food_table.percentage_of_kijun(&kijun), Some(100.0));
+        
+        let mut food_table = FoodTable::new();
+        food.set("ナトリウム", FoodData::Number(4000.0));
+        food_table.add(food.clone());
+        // ナトリウムが過剰で他の栄養が完全な場合、割合が100以下になるはず
+        assert!(food_table.percentage_of_kijun(&kijun).unwrap() < 100.0);
+    }
 }

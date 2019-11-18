@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 pub mod food_data;
 use food_data::FoodData;
 
@@ -510,7 +508,7 @@ impl Food {
 
 #[test]
 fn test_food_new() {
-    let food = Food::new();
+    Food::new();
 }
 
 #[test]
@@ -546,7 +544,7 @@ fn test_food_get_list() {
 
 #[test]
 fn test_food_change_weight() {
-    let mut food = Food::new();
+    let food = Food::new();
     assert_eq!(food.change_weight(10.0), None);
 
     let mut food = Food::new();

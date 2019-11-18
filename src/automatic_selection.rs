@@ -3,12 +3,9 @@ use std::io::BufReader;
 use std::iter::Iterator;
 
 use clap::ArgMatches;
-use serde_json::Value;
 
 use crate::food_table::FoodTable;
-use crate::food::Food;
-use crate::food::food_data::FoodData;
-use crate::parse_json::{Body, parse_body, parse_json};
+use crate::parse_json::parse_json;
 use crate::kijun::Kijun;
 use crate::combination::Combination;
 
@@ -50,7 +47,7 @@ pub fn automatic_selection(matches: &ArgMatches) -> Result<(), String> {
         None => return Err("ファイルを指定してください".to_string())
     };
 
-    let mut file = match File::open(path) {
+    let file = match File::open(path) {
         Ok(file) => file,
         Err(e) => return Err(e.to_string())
     };
@@ -90,7 +87,7 @@ pub fn automatic_selection(matches: &ArgMatches) -> Result<(), String> {
     let list_of_length_of_combination = parsed_data.comb.unwrap_or(vec![5]);
 
     for length_of_combination in list_of_length_of_combination {
-        let keys: Vec<_> = inputted_food_table.iter().map(|(key, food)| key.to_string()).collect();
+        let keys: Vec<_> = inputted_food_table.iter().map(|(key, _)| key.to_string()).collect();
         let comb = Combination::new(keys, length_of_combination);
 
         for key_list in comb.iter() {
@@ -101,7 +98,7 @@ pub fn automatic_selection(matches: &ArgMatches) -> Result<(), String> {
         }
     }
 
-    food_table_list.sort_by(|(p, f), (p2, f2)| p2.partial_cmp(&p).unwrap());
+    food_table_list.sort_by(|(p, _), (p2, _)| p2.partial_cmp(&p).unwrap());
 
     for (index, (percentage, ft)) in food_table_list.iter().take(5).enumerate() {
         println!("{}", color(&format!("[{}] 摂取基準の達成率: {}", index+1, percentage), "g+"));

@@ -111,7 +111,7 @@ fn search(matches: &ArgMatches) -> Result<(), String> {
 }
 
 fn print_table(path: &str, foods: &FoodTable) -> Result<(), String> {
-    let mut file = match File::open(path) {
+    let file = match File::open(path) {
         Ok(file) => file,
         Err(e) => return Err(e.to_string())
     };
@@ -158,13 +158,8 @@ fn print_table(path: &str, foods: &FoodTable) -> Result<(), String> {
 }
 
 fn calc(matches: &ArgMatches) -> Result<(), String>{
-    let path = match matches.value_of("file") {
-        Some(path) => path,
-        None => return Err("ファイルを指定してください".to_string())
-    };
-
     let path = "/home/jibuntu/programming_language/rust/project/meal/data/foods.json";
-    let mut foods = match FoodTable::from_json(path) {
+    let foods = match FoodTable::from_json(path) {
         Ok(foods) => foods,
         Err(e) => return Err(e.to_string())
     };
