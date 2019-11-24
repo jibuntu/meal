@@ -121,12 +121,29 @@ fn print_table(path: &str, foods: &FoodTable) -> Result<(), String> {
         Err(e) => return Err(e)
     };
 
+    let mut udf_table = FoodTable::new();
+    if let Some(udfs) = parsed_data.user_definition_foods {
+        for udf in udfs {
+            let mut food = food::Food::new();
+            // 食品番号の先頭にuをつける
+            // すでにある食品番号と被らないように
+            food.set("食品番号", FoodData::String("u".to_string() + &udf.number));
+            food.set("重量", FoodData::Number(udf.weight));
+            for (name, food_data) in udf.data {
+                food.set(&name, FoodData::from_str(&food_data))
+            }
+            udf_table.add(food)
+        }
+    }
 
     let mut food_table = FoodTable::new();
     for parsed_food in parsed_data.foods {
         let mut food = match foods.get(&parsed_food.number) {
             Some(food) => food.change_weight(parsed_food.weight.unwrap_or(100.0)).unwrap(),
-            None => return Err(format!("{}番の食材はありません。JSONの値が間違っています", &parsed_food.number))
+            None => match udf_table.get(&parsed_food.number) {
+                Some(food) => food.change_weight(parsed_food.weight.unwrap_or(100.0)).unwrap(),
+                None => return Err(format!("{}番の食材はありません。JSONの値が間違っています", &parsed_food.number))
+            }
         };
 
         if let Some(price) = parsed_food.price {

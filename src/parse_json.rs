@@ -1,4 +1,5 @@
 use std::io::BufReader;
+use std::collections::HashMap;
 
 use serde_json::Value;
 
@@ -17,7 +18,8 @@ pub struct ParsedData {
     pub foods: Vec<ParsedFood>,
     pub name_list: Vec<String>,
     pub body: Body,
-    pub comb: Option<Vec<usize>>
+    pub comb: Option<Vec<usize>>,
+    pub user_definition_foods: Option<Vec<UserDefinitionFood>>
 }
 
 pub struct ParsedFood {
@@ -25,6 +27,12 @@ pub struct ParsedFood {
     pub weight: Option<f32>,
     pub price: Option<f32>,
     pub include_refuse: bool
+}
+
+pub struct UserDefinitionFood {
+    pub number: String,
+    pub weight: f32,
+    pub data: HashMap<String, String>
 }
 
 pub struct Body {
@@ -214,6 +222,34 @@ pub fn parse_combination(data: &Value) -> Result<Vec<usize>, String> {
     Ok(values)
 }
 
+pub fn parse_user_definition_foods(data: &Value) -> Result<Vec<UserDefinitionFood>, String>{
+    let mut foods = Vec::new();
+    let obj = value_or_error!(data.as_object(), "user_definition_foodsの値はオブジェクトにしてください");
+
+    for (number, udf) in obj {
+        let number = number.to_string();
+        let weight_value = value_or_error!(udf.get("weight"), "user_definition_foodsの値のオブジェクトにweight属性がありません");
+        let weight = value_or_error!(weight_value.as_f64(), "user_definition_foodsの値のオブジェクトのweight属性の値をf64に変換できません");
+        let weight = weight as f32;
+        let mut data = HashMap::new();
+        
+        if let Some(Value::Object(data_list)) = udf.get("data") {
+            for (name, food_data) in data_list {
+                let food_data = value_or_error!(food_data.as_str(), "user_definition_foodsの値のオブジェクトのdata属性のオブジェクトの値は文字列にしてください");
+                data.insert(name.to_string(), food_data.to_string());
+            }
+        }
+
+        foods.push(UserDefinitionFood {
+            number,
+            weight,
+            data
+        })
+    }
+
+    Ok(foods)
+}
+
 pub fn parse_json<T: std::io::Read>(reader: BufReader<T>) -> Result<ParsedData, String> {
     let data: Value = match serde_json::from_reader(reader) {
         Ok(data) => data,
@@ -257,12 +293,21 @@ pub fn parse_json<T: std::io::Read>(reader: BufReader<T>) -> Result<ParsedData, 
         }
     };
 
+    let user_definition_foods = match obj.get("user_definition_foods") {
+        None => None,
+        Some(value) => match parse_user_definition_foods(value) {
+            Ok(foods) => Some(foods),
+            Err(e) => return Err(e)
+        }
+    };
+
 
     Ok(ParsedData {
         foods,
         name_list,
         body,
-        comb
+        comb,
+        user_definition_foods
     })
 }
 

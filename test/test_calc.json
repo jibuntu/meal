@@ -1,5 +1,23 @@
 {
+    "user_definition_foods": {
+        "1": {
+            "weight": 100,
+             "data": {
+                 "食品名": "あなたに定義された食品",
+                 "エネルギー": "200",
+                 "ビタミンC": "50"
+            }
+        },
+        "2": {
+            "weight": 1,
+            "data": {
+                "食品名": "あなたに定義された２つ目の食品"
+            }
+        }
+    },
     "foods": [
+    {"number": "u1", "weight": 50},
+    {"number": "u2", "weight": 10},
 	{"number": "04047"},
 	{"number": "01083", "weight": 112},
 	{"number": "12004", "weight": 50}
