@@ -323,7 +323,10 @@ impl Food {
     pub fn change_weight(&self, weight: f32) -> Option<Food> {
         let rate = match self.weight.get_number() {
             None => return None,
-            Some(num) => weight / *num
+            Some(num) => match num {
+                num if *num <= 0.0 => 0.0,
+                _ => weight / *num
+            }
         };
 
         let food = Food {
