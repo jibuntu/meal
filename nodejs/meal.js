@@ -33,6 +33,11 @@ function Json() {
     return this
   }
 
+  this.userDefinitionFoods = (foods) => {
+    this.data["user_definition_foods"] = foods.data_list
+    return this
+  }
+
   this.name_list = (type) => {
     if(type == "摂取基準") {
       this.data["name_list"] = this.data["name_list"].concat([
@@ -232,10 +237,40 @@ function Foods() {
   }
 }
 
+function UserDefinitionFoods() {
+  this.data_list = {}
+  this.food_number = ""
+
+  this.food = (food_number) => {
+    this.food_number = food_number
+    this.data_list[this.food_number] = {}
+    return this
+  }
+
+  this.f = (food_number) => {
+    return this.food(food_number)
+  }
+
+  this.weight = (weight) => {
+    this.data_list[this.food_number]["weight"] = weight
+    return this
+  }
+
+  this.w = (weight) => {
+    return this.weight(weight)
+  }
+
+  this.data = (data) => {
+    this.data_list[this.food_number]["data"] = data
+    return this
+  }
+}
+
 module.exports = {
   "Command": Command,
   "Json": Json,
   "Body": Body,
-  "Foods": Foods
+  "Foods": Foods,
+  "UserDefinitionFoods": UserDefinitionFoods
 }
 
