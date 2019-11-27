@@ -19,7 +19,8 @@ pub struct ParsedData {
     pub name_list: Vec<String>,
     pub body: Body,
     pub comb: Option<Vec<usize>>,
-    pub user_definition_foods: Option<Vec<UserDefinitionFood>>
+    pub user_definition_foods: Option<Vec<UserDefinitionFood>>,
+    pub options: Options
 }
 
 pub struct ParsedFood {
@@ -42,6 +43,29 @@ pub struct Body {
     pub gender: Gender,
     pub pal: PAL,
     pub days: Option<usize>
+}
+
+pub struct Options {
+    pub show_status: bool
+}
+
+impl Options {
+    fn new() -> Options {
+        Options {
+            show_status: false
+        }
+    }
+
+    fn set(&mut self, k: &str, v: &Value) -> Result<(), String> {
+        match k {
+            "show_status" => {
+                self.show_status = value_or_error!(v.as_bool(), "show_statusの値はboolにしてください");
+            },
+            _ => return Err(format!("{} というオプションはありません", k))
+        }
+
+        Ok(())
+    }
 }
 
 pub fn parse_foods(data: &Value) -> Result<Vec<ParsedFood>, String> {
@@ -250,6 +274,20 @@ pub fn parse_user_definition_foods(data: &Value) -> Result<Vec<UserDefinitionFoo
     Ok(foods)
 }
 
+pub fn parse_options(data: &Value) -> Result<Options, String> {
+    let obj = value_or_error!(data.as_object(), "Optionsの値はオブジェクトにしてください");
+    let mut options = Options::new();
+
+    for (k, v) in obj {
+        match options.set(k, v) {
+            Err(e) => return Err(e),
+            _ => ()
+        }
+    }
+
+    return Ok(options)
+}
+
 pub fn parse_json<T: std::io::Read>(reader: BufReader<T>) -> Result<ParsedData, String> {
     let data: Value = match serde_json::from_reader(reader) {
         Ok(data) => data,
@@ -301,13 +339,22 @@ pub fn parse_json<T: std::io::Read>(reader: BufReader<T>) -> Result<ParsedData, 
         }
     };
 
+    let options = match obj.get("options") {
+        None => Options::new(),
+        Some(value) => match parse_options(value) {
+            Ok(options) => options,
+            Err(e) => return Err(e)
+        }
+    };
+
 
     Ok(ParsedData {
         foods,
         name_list,
         body,
         comb,
-        user_definition_foods
+        user_definition_foods,
+        options
     })
 }
 
