@@ -7,8 +7,10 @@ use std::slice::Iter;
 use serde_json::Value;
 use prettytable::{Table, Row, Cell};
 
+use crate::food::KEY_LIST as FOOD_KEY_LIST;
 use crate::food::Food;
 use crate::food::food_data::FoodData;
+use crate::kijun::KEY_LIST as KIJUN_KEY_LIST;
 use crate::kijun::{Kijun, KijunValue};
 
 
@@ -20,28 +22,6 @@ macro_rules! value_or_error {
         }
     };
 }
-
-const KEY_LIST: [&str;68] = ["食品群", "食品番号", "索引番号", "食品名", "廃棄率", "エネルギー",
-"エネルギー（kJ)", "水分", "たんぱく質", "アミノ酸組成によるたんぱく質", "脂質",
-"トリアシルグリセロール当量", "飽和脂肪酸", "一価不飽和脂肪酸", "多価不飽和脂肪酸",
-"コレステロール", "炭水化物", "利用可能炭水化物（単糖当量）", "水溶性食物繊維",
-"不溶性食物繊維", "食物繊維総量", "灰   分", "ナトリウム", "カリウム", "カルシウム",
-"マグネシウム", "リン", "鉄", "亜鉛", "銅", "マンガン", "ヨウ素", "セレン", "クロム",
-"モリブデン", "レチノール", "α-カロテン", "β-カロテン", "β-クリプトキサンチン",
-"β-カロテン当量", "レチノール活性当量", "ビタミンD", "α-トコフェロール",
-"β-トコフェロール", "γ-トコフェロール", "δ-トコフェロール", "ビタミンK", "ビタミンB1",
-"ビタミンB2", "ナイアシン", "ビタミンB6", "ビタミンB12", "葉酸", "パントテン酸", "ビオチン",
-"ビタミンC", "食塩相当量", "アルコール", "硝酸イオン", "テオブロミン", "カフェイン",
-"タンニン", "ポリフェノール", "酢酸", "調理油", "有機酸", "重量変化率", "備考"];
-
-const KIJUN_KEY_LIST: [&str;33] = [
-    "エネルギー", "たんぱく質", "脂質", "飽和脂肪酸",
-    "多価不飽和脂肪酸", "炭水化物", "食物繊維総量", "レチノール活性当量",
-    "ビタミンD", "α-トコフェロール", "ビタミンK", "ビタミンB1", "ビタミンB2",
-    "ナイアシン", "ビタミンB6", "ビタミンB12", "葉酸", "パントテン酸", "ビオチン",
-    "ビタミンC", "ナトリウム", "カリウム", "カルシウム", "マグネシウム", "リン",
-    "鉄", "亜鉛", "銅", "マンガン", "ヨウ素", "セレン", "クロム", "モリブデン"
-];
 
 fn color(text: &str, style: &str) -> String {
     let mut colored_text = String::new();
@@ -114,14 +94,14 @@ impl FoodTable {
             let mut food = Food::new();
 
             // stringの部分をセット
-            for (value, key) in value_list[0..4].iter().zip(KEY_LIST[0..4].iter()) {
+            for (value, key) in value_list[0..4].iter().zip(FOOD_KEY_LIST[0..4].iter()) {
                 let data = value_or_error!(value.as_str(), "foods属性の値が読み込めません");
                 food.set(key, FoodData::String(data.to_string()));
             }
 
             // それ以降をセット
-            let len = KEY_LIST.len();
-            for (value, key) in value_list[4..len].iter().zip(KEY_LIST[4..len].iter()) {
+            let len = FOOD_KEY_LIST.len();
+            for (value, key) in value_list[4..len].iter().zip(FOOD_KEY_LIST[4..len].iter()) {
                 let data = value_or_error!(value.as_str(), "foods属性の値が読み込めません");
                 food.set(key, FoodData::from_str(data));
             }
@@ -364,7 +344,7 @@ impl FoodTable {
         table.add_row(Row::new(row));
     }
 
-
+    
     pub fn print(&self, name_list: &[&str]) {
         let table = self.get_table(name_list);
 
