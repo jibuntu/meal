@@ -397,6 +397,33 @@ impl FoodTable {
 
         table.add_row(Row::new(row));
     }
+
+//    pub fn get_percentage_of_animal_protein(&self) -> usize {
+//        let per = 0;
+//        let mut food_table = FoodTable::new();
+//        
+//        for (_, food) in &self.food_list {
+//            let group = match food.get("食品群").unwrap().get_number() {
+//                Some(group) => group,
+//                None => continue
+//            };
+//            
+//            if 10.0 <= *group || *group <= 13.0 {
+//                food_table.add(food.clone());
+//            }
+//        }
+//
+//        let sum = food_table.get_sum();
+//        sum.get("たんぱく質").
+//
+//        2
+//    }
+//
+//    pub fn get_status(&self) -> String {
+//
+//
+//        "test get_status()".to_string()
+//    }
     
     pub fn print(&self, name_list: &[&str]) {
         let table = self.get_table(name_list);

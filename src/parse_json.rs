@@ -27,6 +27,7 @@ pub struct ParsedFood {
     pub number: String,
     pub weight: Option<f32>,
     pub price: Option<f32>,
+    pub class: Option<String>,
     pub include_refuse: bool
 }
 
@@ -110,6 +111,14 @@ pub fn parse_foods(data: &Value) -> Result<Vec<ParsedFood>, String> {
                     _ => None
                 };
 
+                let class = match obj.get("class") {
+                    Some(class) => {
+                        let class = value_or_error!(class.as_str(), "classの値は文字列にしてください");
+                        Some(class.to_string())
+                    },
+                    _ => None
+                };
+                
                 let include_refuse = match obj.get("include_refuse") {
                     Some(include_refuse) => value_or_error!(include_refuse.as_bool(), "include_refuseの値はboolにしてください"),
                     _ => false
@@ -119,6 +128,7 @@ pub fn parse_foods(data: &Value) -> Result<Vec<ParsedFood>, String> {
                     number,
                     weight,
                     price,
+                    class,
                     include_refuse
                 }
             },

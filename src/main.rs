@@ -150,6 +150,10 @@ fn print_table(path: &str, foods: &FoodTable) -> Result<(), String> {
             food.set("価格", FoodData::Number(price));
         }
 
+        if let Some(class) = parsed_food.class {
+            food.set("クラス", FoodData::String(class));
+        }
+
         if parsed_food.include_refuse == true {
             food = match food.include_refuse() {
                 Some(food) => food,
@@ -170,9 +174,9 @@ fn print_table(path: &str, foods: &FoodTable) -> Result<(), String> {
                            parsed_data.body.days.unwrap_or(1));
     food_table.print_with_sum_and_kijun(&list, &kijun);
 
-    if parsed_data.options.show_status {
-        println!("{}", food_table.get_status());
-    }
+//    if parsed_data.options.show_status {
+//        println!("{}", food_table.get_status());
+//    }
     
     println!();
 

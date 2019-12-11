@@ -4,7 +4,6 @@
             "weight": 100,
              "data": {
                  "食品名": "あなたに定義された食品",
-                 "クラス": "test1",
                  "エネルギー": "200",
                  "ビタミンC": "50"
             }
@@ -12,14 +11,13 @@
         "2": {
             "weight": 0,
             "data": {
-                "食品名": "あなたに定義された２つ目の食品",
-                "クラス": "test1"
+                "食品名": "あなたに定義された２つ目の食品"
             }
         }
     },
     "foods": [
-    {"number": "u1", "weight": 50},
-    {"number": "u2", "weight": 10},
+        {"number": "u1", "weight": 50, "class": "test1"},
+        {"number": "u2", "weight": 10, "class": "test1"},
 	{"number": "04047"},
 	{"number": "01083", "weight": 112},
 	{"number": "12004", "weight": 50}
