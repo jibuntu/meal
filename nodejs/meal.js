@@ -41,7 +41,7 @@ function Json() {
   this.name_list = (type) => {
     if(type == "摂取基準") {
       this.data["name_list"] = this.data["name_list"].concat([
-        "食品番号", "食品名", "価格", "重量", "可食量", "廃棄率", "エネルギー", "たんぱく質",
+        "食品番号", "クラス", "食品名", "価格", "重量", "可食量", "廃棄率", "エネルギー", "たんぱく質",
         "脂質", "飽和脂肪酸", "多価不飽和脂肪酸", "炭水化物", "食物繊維総量", 
         "レチノール活性当量", "ビタミンD", "α-トコフェロール", 
         "ビタミンK", "ビタミンB1", "ビタミンB2", "ナイアシン", 
@@ -204,6 +204,15 @@ function Foods() {
 
   this.ppg = (price_per_gram) => {
     return this.price_per_gram(price_per_gram)
+  }
+
+  this.class = (c) => {
+    this.data_list[this.data_list.length - 1]["class"] = c
+    return this
+  }
+
+  this.c = (c) => {
+    return this.class(c)
   }
 
   this.changeWeight = (rate) => {
