@@ -1,7 +1,7 @@
 pub mod food_data;
 use food_data::FoodData;
 
-pub const KEY_LIST: [&str;68] = ["食品群", "食品番号", "索引番号", "食品名", "廃棄率", "エネルギー",
+pub const KEY_LIST: [&str;69] = ["クラス", "食品群", "食品番号", "索引番号", "食品名", "廃棄率", "エネルギー",
 "エネルギー（kJ)", "水分", "たんぱく質", "アミノ酸組成によるたんぱく質", "脂質",
 "トリアシルグリセロール当量", "飽和脂肪酸", "一価不飽和脂肪酸", "多価不飽和脂肪酸",
 "コレステロール", "炭水化物", "利用可能炭水化物（単糖当量）", "水溶性食物繊維",
@@ -16,6 +16,7 @@ pub const KEY_LIST: [&str;68] = ["食品群", "食品番号", "索引番号", "�
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Food {
+    pub class: FoodData,        // クラス
     pub group: FoodData,        // 食品群
     pub number: FoodData,       // 食品番号
     pub index: FoodData,        // 索引番号
@@ -92,6 +93,7 @@ pub struct Food {
 impl Food {
     pub fn new() -> Food {
         Food {
+            class: FoodData::None,        // クラス
             group: FoodData::None,        // 食品群
             number: FoodData::None,       // 食品番号
             index: FoodData::None,        // 索引番号
@@ -168,6 +170,7 @@ impl Food {
 
     pub fn set(&mut self, name: &str, value: FoodData) {
         let food_data = match name {
+            "クラス" => &mut self.class,
             "食品群" => &mut self.group,
             "食品番号" => &mut self.number,
             "索引番号" => &mut self.index,
@@ -247,6 +250,7 @@ impl Food {
 
     pub fn get(&self, name: &str) -> Option<&FoodData> {
         let food_data = match name {
+            "クラス" => &self.class,
             "食品群" => &self.group,
             "食品番号" => &self.number,
             "索引番号" => &self.index,
@@ -343,6 +347,7 @@ impl Food {
         };
 
         let food = Food {
+            class: self.class.clone(),                  // クラス
             group: self.group.clone(),                  // 食品群
             number: self.number.clone(),                // 食品番号
             index: self.index.clone(),                  // 索引番号
@@ -421,6 +426,7 @@ impl Food {
 
     pub fn add(&self, food: &Food) -> Food {
         Food {
+            class: FoodData::None,
             group: FoodData::None,
             number: FoodData::None,
             index: FoodData::None,

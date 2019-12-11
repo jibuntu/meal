@@ -3,6 +3,7 @@
 use std::fs::File;
 use std::io::BufReader;
 use std::slice::Iter;
+use std::collections::HashMap;
 
 use serde_json::Value;
 use prettytable::{Table, Row, Cell};
@@ -12,7 +13,6 @@ use crate::food::Food;
 use crate::food::food_data::FoodData;
 use crate::kijun::KEY_LIST as KIJUN_KEY_LIST;
 use crate::kijun::{Kijun, KijunValue};
-
 
 macro_rules! value_or_error {
     ($option:expr, $error:expr) => {
@@ -94,14 +94,14 @@ impl FoodTable {
             let mut food = Food::new();
 
             // stringの部分をセット
-            for (value, key) in value_list[0..4].iter().zip(FOOD_KEY_LIST[0..4].iter()) {
+            for (value, key) in value_list[0..4].iter().zip(FOOD_KEY_LIST[1..5].iter()) {
                 let data = value_or_error!(value.as_str(), "foods属性の値が読み込めません");
                 food.set(key, FoodData::String(data.to_string()));
             }
 
             // それ以降をセット
-            let len = FOOD_KEY_LIST.len();
-            for (value, key) in value_list[4..len].iter().zip(FOOD_KEY_LIST[4..len].iter()) {
+            let len = FOOD_KEY_LIST.len() - 1;
+            for (value, key) in value_list[4..len].iter().zip(FOOD_KEY_LIST[5..len].iter()) {
                 let data = value_or_error!(value.as_str(), "foods属性の値が読み込めません");
                 food.set(key, FoodData::from_str(data));
             }
@@ -158,6 +158,28 @@ impl FoodTable {
                 *food = new_food;
             }
         }
+    }
+
+    pub fn split_by_class(&self) -> HashMap<String, FoodTable> {
+        let mut class_list = HashMap::new();
+        
+        for (_, food) in &self.food_list {
+            let class_name = if let FoodData::String(s) = food.get("クラス").unwrap() {
+                s
+            } else {
+                continue
+            };
+            
+            if !class_list.contains_key(class_name) {
+                let mut food_table = FoodTable::new();
+                food_table.add(food.clone());
+                class_list.insert(class_name.to_string(), food_table);
+            } else {
+                class_list.get_mut(class_name).unwrap().add(food.clone())
+            }
+        }
+
+        class_list
     }
 
     pub fn search(&self, text: &str) -> FoodTable {
@@ -290,6 +312,38 @@ impl FoodTable {
         table.add_row(Row::new(row));
     }
 
+    pub fn add_percentage_of_classes_to_table(&self, table: &mut Table, name_list: &[&str]) {
+        // クラスごとの割合を追加する
+        let sum_food = self.get_sum();
+        let sum = sum_food.get_list(name_list);
+        let class_list = self.split_by_class();
+
+        for (class_name, class_food_table) in class_list {
+            let sum_food = class_food_table.get_sum();
+            let class_sum = sum_food.get_list(name_list);
+            let mut row = Vec::new();
+
+            for (name, (class_food_data, food_data)) in name_list.iter().zip(class_sum.iter().zip(sum.iter())) {
+                if *name == "食品名" {
+                    row.push(Cell::new(&color(&format!("{}の割合", class_name), "w+")));
+                } else {
+                    let data = match (class_food_data.unwrap().get_number(), food_data.unwrap().get_number()) {
+                        (Some(class_num), Some(num)) => {
+                            let per = (*class_num / *num) * 100.0;
+                            format!("{:.0}%", per)
+                        }
+                        _ => "-".to_string()
+                    };
+                    let mut cell = Cell::new(&color(&data, "w+"));
+                    //let mut cell = Cell::new(&data);
+                    cell.align(prettytable::format::Alignment::RIGHT);
+                    row.push(cell)
+                }
+            }
+            table.add_row(Row::new(row));
+        }
+    }
+
     pub fn add_kijun_to_table(&self, table: &mut Table, name_list: &[&str], kijun: &Kijun) {
         // 摂取基準を追加する
         let mut row = Vec::new();
@@ -343,7 +397,6 @@ impl FoodTable {
 
         table.add_row(Row::new(row));
     }
-
     
     pub fn print(&self, name_list: &[&str]) {
         let table = self.get_table(name_list);
@@ -354,6 +407,7 @@ impl FoodTable {
     pub fn print_with_sum(&self, name_list: &[&str]) {
         let mut table = self.get_table(name_list);
         self.add_sum_to_table(&mut table, name_list);
+        self.add_percentage_of_classes_to_table(&mut table, name_list);
 
         table.printstd();
     }
@@ -363,6 +417,7 @@ impl FoodTable {
         self.add_sum_to_table(&mut table, name_list);
         self.add_kijun_to_table(&mut table, name_list, &kijun);
         self.add_kijun_percentage_to_table(&mut table, name_list, &kijun);
+        self.add_percentage_of_classes_to_table(&mut table, name_list);
         let percentage = self.percentage_of_kijun(&kijun).unwrap_or(-1.0);
         println!("{}", color(&format!("摂取基準の達成率（{}日分）: {:.2}%", kijun.days, percentage), "g+"));
         table.printstd();
@@ -499,6 +554,37 @@ mod test {
 
         food_table.set_weight(50.0);
         assert_eq!(food_table.get("01001").unwrap().get("重量"), Some(&FoodData::Number(50.0)))
+    }
+
+    #[test]
+    fn test_food_table_split_by_class() {
+        let mut food_table = FoodTable::new();
+
+        let mut f1 = Food::new();
+        f1.set("食品番号", FoodData::String("1".to_string()));
+        food_table.add(f1.clone());
+        let mut f2 = Food::new();
+        f2.set("食品番号", FoodData::String("2".to_string()));
+        f2.set("クラス", FoodData::String("test1".to_string()));
+        food_table.add(f2.clone());
+        let mut f3 = Food::new();
+        f3.set("食品番号", FoodData::String("3".to_string()));
+        f3.set("クラス", FoodData::String("test1".to_string()));
+        food_table.add(f3.clone());
+        let mut f4 = Food::new();
+        f4.set("食品番号", FoodData::String("4".to_string()));
+        f4.set("クラス", FoodData::String("test2".to_string()));
+        food_table.add(f4.clone());
+        let mut f5 = Food::new();
+        f5.set("食品番号", FoodData::String("5".to_string()));
+        f5.set("クラス", FoodData::String("test2".to_string()));
+        food_table.add(f5.clone());
+        
+        let class_list = food_table.split_by_class();
+        assert!(class_list.contains_key("test1"));
+        assert!(class_list.contains_key("test2"));
+        assert_eq!(class_list.get("test1").unwrap().food_list, vec![("2".to_string(), f2), ("3".to_string(), f3)]);
+        assert_eq!(class_list.get("test2").unwrap().food_list, vec![("4".to_string(), f4), ("5".to_string(), f5)]);
     }
 
     #[test]

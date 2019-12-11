@@ -169,6 +169,11 @@ fn print_table(path: &str, foods: &FoodTable) -> Result<(), String> {
                            parsed_data.body.pal,
                            parsed_data.body.days.unwrap_or(1));
     food_table.print_with_sum_and_kijun(&list, &kijun);
+
+    if parsed_data.options.show_status {
+        println!("{}", food_table.get_status());
+    }
+    
     println!();
 
     Ok(())
