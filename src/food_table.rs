@@ -101,7 +101,7 @@ impl FoodTable {
 
             // それ以降をセット
             let len = FOOD_KEY_LIST.len() - 1;
-            for (value, key) in value_list[4..len].iter().zip(FOOD_KEY_LIST[5..len].iter()) {
+            for (value, key) in value_list[4..len].iter().zip(FOOD_KEY_LIST[5..len+1].iter()) {
                 let data = value_or_error!(value.as_str(), "foods属性の値が読み込めません");
                 food.set(key, FoodData::from_str(data));
             }
